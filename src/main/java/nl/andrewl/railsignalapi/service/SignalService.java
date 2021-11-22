@@ -22,10 +22,7 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -93,12 +90,14 @@ public class SignalService {
 			log.warn("Warning! Train is entering a non-free branch {}.", toBranch.getName());
 		}
 		if (toBranch.getStatus() != BranchStatus.OCCUPIED) {
+			log.info("Updating branch {} status from {} to {}.", toBranch.getName(), toBranch.getStatus(), BranchStatus.OCCUPIED);
 			toBranch.setStatus(BranchStatus.OCCUPIED);
 			branchRepository.save(toBranch);
 			broadcastToConnectedSignals(toBranch);
 		}
 		if (updateType == SignalUpdateType.END) {
 			if (fromBranch.getStatus() != BranchStatus.FREE) {
+				log.info("Updating branch {} status from {} to {}.", fromBranch.getName(), fromBranch.getStatus(), BranchStatus.FREE);
 				fromBranch.setStatus(BranchStatus.FREE);
 				branchRepository.save(fromBranch);
 				broadcastToConnectedSignals(fromBranch);
@@ -124,5 +123,21 @@ public class SignalService {
 			e.printStackTrace();
 		}
 
+	}
+
+	@Transactional(readOnly = true)
+	public SignalResponse getSignal(long rsId, long sigId) {
+		var s = signalRepository.findByIdAndRailSystemId(sigId, rsId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		return new SignalResponse(s);
+	}
+
+	@Transactional(readOnly = true)
+	public List<SignalResponse> getAllSignals(long rsId) {
+		var rs = railSystemRepository.findById(rsId)
+						.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rail system not found."));
+		return signalRepository.findAllByRailSystemOrderByName(rs).stream()
+				.map(SignalResponse::new)
+				.toList();
 	}
 }

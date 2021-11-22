@@ -3,6 +3,7 @@ package nl.andrewl.railsignalapi.rest.dto;
 import nl.andrewl.railsignalapi.model.Signal;
 import nl.andrewl.railsignalapi.model.SignalBranchConnection;
 
+import java.util.Comparator;
 import java.util.List;
 
 public record SignalResponse(
@@ -15,6 +16,7 @@ public record SignalResponse(
 				signal.getId(),
 				signal.getName(),
 				signal.getBranchConnections().stream()
+						.sorted(Comparator.comparing(SignalBranchConnection::getDirection))
 						.map(ConnectionData::new)
 						.toList()
 		);

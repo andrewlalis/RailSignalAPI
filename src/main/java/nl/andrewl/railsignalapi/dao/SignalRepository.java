@@ -13,10 +13,13 @@ import java.util.Optional;
 @Repository
 public interface SignalRepository extends JpaRepository<Signal, Long> {
 	Optional<Signal> findByIdAndRailSystem(long id, RailSystem railSystem);
+	Optional<Signal> findByIdAndRailSystemId(long id, long railSystemId);
 	boolean existsByNameAndRailSystem(String name, RailSystem railSystem);
 
 	@Query("SELECT DISTINCT s FROM Signal s " +
 			"LEFT JOIN s.branchConnections bc " +
 			"WHERE bc.branch = :branch")
 	List<Signal> findAllConnectedToBranch(Branch branch);
+
+	List<Signal> findAllByRailSystemOrderByName(RailSystem railSystem);
 }
