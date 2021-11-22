@@ -10,6 +10,9 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -24,27 +27,23 @@ public class SignalWebSocketHandler extends TextWebSocketHandler {
 			session.close(CloseStatus.PROTOCOL_ERROR);
 			return;
 		}
-		long signalId = Long.parseLong(signalIdHeader);
-		session.getAttributes().put("signalId", signalId);
-		signalService.registerSignalWebSocketSession(signalId, session);
-		log.info("Connection established with signal {}.", signalId);
+		Set<Long> ids = new HashSet<>();
+		for (var idStr : signalIdHeader.split(",")) {
+			ids.add(Long.parseLong(idStr.trim()));
+		}
+		signalService.registerSignalWebSocketSession(ids, session);
+		log.info("Connection established with signals {}.", ids);
 	}
 
 	@Override
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 		var msg = mapper.readValue(message.getPayload(), SignalUpdateMessage.class);
-		Long signalId = (Long) session.getAttributes().get("signalId");
-		if (signalId == null) {
-			log.warn("Got text message from a websocket session that did not establish a signalId session attribute.");
-		} else {
-			log.info("Received update from signal {}.", signalId);
-			signalService.handleSignalUpdate(signalId, msg);
-		}
+		signalService.handleSignalUpdate(msg);
 	}
 
 	@Override
-	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-		signalService.deregisterSignalWebSocketSession((Long) session.getAttributes().get("signalId"));
-		log.info("Closed connection to signal {}. Status: {}", session.getAttributes().get("signalId"), status.toString());
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+		signalService.deregisterSignalWebSocketSession(session);
+		log.info("Closed connection {}. Status: {}", session.getId(), status.toString());
 	}
 }

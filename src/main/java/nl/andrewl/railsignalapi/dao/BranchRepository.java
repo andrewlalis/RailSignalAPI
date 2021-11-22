@@ -11,6 +11,8 @@ import java.util.Optional;
 @Repository
 public interface BranchRepository extends JpaRepository<Branch, Long> {
 	Optional<Branch> findByIdAndRailSystem(long id, RailSystem railSystem);
+	Optional<Branch> findByIdAndRailSystemId(long id, long railSystemId);
 	Optional<Branch> findByNameAndRailSystem(String name, RailSystem railSystem);
+	List<Branch> findAllByRailSystemOrderByName(RailSystem railSystem);
 	List<Branch> findAllByNameAndRailSystem(String name, RailSystem railSystem);
 }
