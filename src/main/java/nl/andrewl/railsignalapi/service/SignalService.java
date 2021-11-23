@@ -65,9 +65,15 @@ public class SignalService {
 	public void registerSignalWebSocketSession(Set<Long> signalIds, WebSocketSession session) {
 		this.signalWebSocketSessions.put(session, signalIds);
 		// Instantly send a data packet so that the signals are up-to-date.
+		RailSystem rs = null;
 		for (var signalId : signalIds) {
 			var signal = signalRepository.findById(signalId)
 					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid signal id."));
+			if (rs == null) {
+				rs = signal.getRailSystem();
+			} else if (!rs.getId().equals(signal.getRailSystem().getId())) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot open signal websocket session for signals from different rail systems.");
+			}
 			for (var branchConnection : signal.getBranchConnections()) {
 				try {
 					session.sendMessage(new TextMessage(mapper.writeValueAsString(
@@ -80,11 +86,22 @@ public class SignalService {
 					e.printStackTrace();
 				}
 			}
+			signal.setOnline(true);
+			signalRepository.save(signal);
 		}
 	}
 
+	@Transactional
 	public void deregisterSignalWebSocketSession(WebSocketSession session) {
-		this.signalWebSocketSessions.remove(session);
+		var ids = this.signalWebSocketSessions.remove(session);
+		if (ids != null) {
+			for (var signalId : ids) {
+				signalRepository.findById(signalId).ifPresent(signal -> {
+					signal.setOnline(false);
+					signalRepository.save(signal);
+				});
+			}
+		}
 	}
 
 	public WebSocketSession getSignalWebSocketSession(long signalId) {

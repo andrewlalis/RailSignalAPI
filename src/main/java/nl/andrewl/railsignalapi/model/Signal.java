@@ -2,6 +2,7 @@ package nl.andrewl.railsignalapi.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -22,6 +23,10 @@ public class Signal {
 
 	@OneToMany(mappedBy = "signal", orphanRemoval = true, cascade = CascadeType.ALL)
 	private Set<SignalBranchConnection> branchConnections;
+
+	@Column(nullable = false)
+	@Setter
+	private boolean online = false;
 
 	public Signal(RailSystem railSystem, String name, Set<SignalBranchConnection> branchConnections) {
 		this.railSystem = railSystem;

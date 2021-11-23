@@ -9,7 +9,8 @@ import java.util.List;
 public record SignalResponse(
 		long id,
 		String name,
-		List<ConnectionData> branchConnections
+		List<ConnectionData> branchConnections,
+		boolean online
 ) {
 	public SignalResponse(Signal signal) {
 		this(
@@ -18,7 +19,8 @@ public record SignalResponse(
 				signal.getBranchConnections().stream()
 						.sorted(Comparator.comparing(SignalBranchConnection::getDirection))
 						.map(ConnectionData::new)
-						.toList()
+						.toList(),
+				signal.isOnline()
 		);
 	}
 
