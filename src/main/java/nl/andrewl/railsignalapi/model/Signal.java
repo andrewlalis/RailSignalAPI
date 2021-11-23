@@ -24,13 +24,17 @@ public class Signal {
 	@OneToMany(mappedBy = "signal", orphanRemoval = true, cascade = CascadeType.ALL)
 	private Set<SignalBranchConnection> branchConnections;
 
+	@Embedded
+	private Position position;
+
 	@Column(nullable = false)
 	@Setter
 	private boolean online = false;
 
-	public Signal(RailSystem railSystem, String name, Set<SignalBranchConnection> branchConnections) {
+	public Signal(RailSystem railSystem, String name, Position position, Set<SignalBranchConnection> branchConnections) {
 		this.railSystem = railSystem;
 		this.name = name;
+		this.position = position;
 		this.branchConnections = branchConnections;
 	}
 }

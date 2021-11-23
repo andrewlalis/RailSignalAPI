@@ -44,7 +44,7 @@ public class SignalService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Signal " + payload.name() + " already exists.");
 		}
 		Set<SignalBranchConnection> branchConnections = new HashSet<>();
-		Signal signal = new Signal(rs, payload.name(), branchConnections);
+		Signal signal = new Signal(rs, payload.name(), payload.position(), branchConnections);
 		for (var branchData : payload.branchConnections()) {
 			Branch branch;
 			if (branchData.id() != null) {
@@ -61,7 +61,7 @@ public class SignalService {
 		return new SignalResponse(signal);
 	}
 
-	@Transactional(readOnly = true)
+	@Transactional
 	public void registerSignalWebSocketSession(Set<Long> signalIds, WebSocketSession session) {
 		this.signalWebSocketSessions.put(session, signalIds);
 		// Instantly send a data packet so that the signals are up-to-date.

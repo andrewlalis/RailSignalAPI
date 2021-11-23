@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RailSignal</title>
+
+    <link href="/static/style/main.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+<body>
+
+
+
+<div class="container">
+    <h1>RailSignal</h1>
+    <p class="lead">Stay in control of your rails.</p>
+
+    <div class="row align-items-center">
+        <div class="col-auto">
+            <label for="railSystemSelect">Select a rail system:</label>
+        </div>
+        <div class="col-auto">
+            <select id="railSystemSelect" class="form-select">
+            </select>
+        </div>
+        <div class="col-auto">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Or add a new system" id="addRailSystemInput"/>
+                <button class="btn btn-success" type="button" id="addRailSystemButton" disabled>Add</button>
+            </div>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-danger" type="button" id="removeRailSystemButton" disabled>Remove Selected System</button>
+        </div>
+    </div>
+
+    <hr class="my-4"/>
+
+    <div class="row">
+        <div id="railMapCanvasParent" class="col border p-0">
+            <canvas id="railMapCanvas" width="1000" height="500"></canvas>
+        </div>
+    </div>
+
+    <div class="row">
+        <textarea id="testingText"></textarea>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+<script src="/static/js/drawing.js"></script>
+<script src="/static/js/main.js"></script>
+
+</body>
+</html>
