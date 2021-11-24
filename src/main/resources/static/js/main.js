@@ -3,6 +3,7 @@ const $ = jQuery;
 let railSystemSelect;
 let railMapCanvas;
 let railSystem = null;
+let detailPanel = null;
 
 let canvasTranslation = {x: 0, y: 0};
 let canvasDragOrigin = null;
@@ -22,6 +23,14 @@ $(document).ready(() => {
     railMapCanvas.mousedown(onCanvasMouseDown);
     railMapCanvas.mouseup(onCanvasMouseUp);
     railMapCanvas.mousemove(onCanvasMouseMove);
+
+    $('#addRailSystemInput').on("input", () => {
+        $('#addRailSystemButton').prop("disabled", $('#addRailSystemInput').val() === "");
+    });
+    $('#addRailSystemButton').click(addRailSystem);
+    $('#removeRailSystemButton').click(deleteRailSystem);
+
+    detailPanel = $('#railMapDetailPanel');
 
     $.get("/api/railSystems")
         .done(railSystems => {
@@ -112,6 +121,7 @@ function getMousePoint(event) {
 }
 
 function railSystemChanged() {
+    detailPanel.empty();
     railSystem = {};
     railSystem.id = railSystemSelect.val();
     $.get("/api/railSystems/" + railSystem.id + "/signals")
@@ -138,10 +148,51 @@ function selectSignalById(id) {
 }
 
 function onSignalSelected(signal) {
-    const dp = $('#railMapDetailPanel');
-    dp.empty();
+    detailPanel.empty();
     if (signal !== null) {
         const tpl = Handlebars.compile($('#signalTemplate').html());
-        dp.html(tpl(signal));
+        detailPanel.html(tpl(signal));
     }
+}
+
+function addRailSystem() {
+    let name = $('#addRailSystemInput').val().trim();
+    $.post({
+        url: "/api/railSystems",
+        data: JSON.stringify({name: name}),
+        contentType: "application/json"
+    })
+        .done((response) => {
+            refreshRailSystems();
+        })
+        .always(() => {
+            $('#addRailSystemInput').val("");
+        });
+}
+
+function deleteRailSystem() {
+    if (railSystem !== null && railSystem.id) {
+        $.ajax({
+            url: "/api/railSystems/" + railSystem.id,
+            type: "DELETE"
+        })
+            .always(() => {
+                refreshRailSystems(true);
+            });
+    }
+}
+
+function refreshRailSystems(selectFirst) {
+    $.get("/api/railSystems")
+        .done(railSystems => {
+            railSystemSelect.empty();
+            railSystems.forEach(railSystem => {
+                let option = $('<option value="' + railSystem.id + '">' + railSystem.name + '</option>')
+                railSystemSelect.append(option);
+            });
+            if (selectFirst) {
+                railSystemSelect.val(railSystems[0].id);
+                railSystemSelect.change();
+            }
+        });
 }

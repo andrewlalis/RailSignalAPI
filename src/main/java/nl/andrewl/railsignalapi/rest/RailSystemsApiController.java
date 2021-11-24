@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import nl.andrewl.railsignalapi.rest.dto.RailSystemCreationPayload;
 import nl.andrewl.railsignalapi.rest.dto.RailSystemResponse;
 import nl.andrewl.railsignalapi.service.RailSystemService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,5 +23,11 @@ public class RailSystemsApiController {
 	@PostMapping
 	public RailSystemResponse createRailSystem(@RequestBody RailSystemCreationPayload payload) {
 		return railSystemService.createRailSystem(payload);
+	}
+
+	@DeleteMapping(path = "/{rsId}")
+	public ResponseEntity<?> deleteRailSystem(@PathVariable long rsId) {
+		railSystemService.delete(rsId);
+		return ResponseEntity.noContent().build();
 	}
 }
