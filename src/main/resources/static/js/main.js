@@ -9,8 +9,8 @@ let canvasDragOrigin = null;
 let canvasDragTranslation = null;
 let hoveredElements = [];
 
-const SCALE_VALUES = [0.01, 0.1, 1.0, 1.25, 1.5, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 16.0, 20.0, 30.0, 45.0, 60.0, 80.0, 100.0];
-const SCALE_INDEX_NORMAL = 5;
+const SCALE_VALUES = [0.01, 0.1, 0.25, 0.5, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, 10.0, 12.0, 16.0, 20.0, 30.0, 45.0, 60.0, 80.0, 100.0];
+const SCALE_INDEX_NORMAL = 7;
 let canvasScaleIndex = SCALE_INDEX_NORMAL;
 
 $(document).ready(() => {
@@ -18,10 +18,10 @@ $(document).ready(() => {
     railSystemSelect.change(railSystemChanged);
 
     railMapCanvas = $('#railMapCanvas');
-    railMapCanvas.on('wheel', onMouseWheel);
-    railMapCanvas.mousedown(onMouseDown);
-    railMapCanvas.mouseup(onMouseUp);
-    railMapCanvas.mousemove(onMouseMove);
+    railMapCanvas.on('wheel', onCanvasMouseWheel);
+    railMapCanvas.mousedown(onCanvasMouseDown);
+    railMapCanvas.mouseup(onCanvasMouseUp);
+    railMapCanvas.mousemove(onCanvasMouseMove);
 
     $.get("/api/railSystems")
         .done(railSystems => {
@@ -34,7 +34,8 @@ $(document).ready(() => {
         });
 });
 
-function onMouseWheel(event) {
+// Handle mouse scrolling within the context of the canvas.
+function onCanvasMouseWheel(event) {
     let s = event.originalEvent.deltaY;
     if (s > 0) {
         canvasScaleIndex = Math.max(0, canvasScaleIndex - 1);
@@ -45,33 +46,40 @@ function onMouseWheel(event) {
     event.stopPropagation();
 }
 
-function onMouseDown(event) {
-    const rect = railMapCanvas[0].getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    canvasDragOrigin = {x: x, y: y};
+// Handle mouse clicks on the canvas.
+function onCanvasMouseDown(event) {
+    const p = getMousePoint(event);
+    canvasDragOrigin = {x: p.x, y: p.y};
 }
 
-function onMouseUp(event) {
+// Handle mouse release on the canvas, which stops dragging or indicates that the user may have clicked on something.
+function onCanvasMouseUp(event) {
     if (canvasDragTranslation !== null) {
         canvasTranslation.x += canvasDragTranslation.x;
         canvasTranslation.y += canvasDragTranslation.y;
     } else {
-        const p = mousePointToWorld(event);
+        const p = getMousePoint(event);
+        let signalClicked = false;
         railSystem.signals.forEach(signal => {
             const sp = new DOMPoint(signal.position.x, signal.position.z, 0, 1);
-            const dist = Math.sqrt(Math.pow(p.x - sp.x, 2) + Math.pow(p.y - sp.y, 2));
-            if (dist < 1) {
+            const canvasSp = worldPointToCanvas(sp);
+            const dist = Math.sqrt(Math.pow(p.x - canvasSp.x, 2) + Math.pow(p.y - canvasSp.y, 2));
+            if (dist < 5) {
                 console.log(signal);
-                $('#testingText').val(JSON.stringify(signal, null, 2));
+                onSignalSelected(signal);
+                signalClicked = true;
             }
         });
+        if (!signalClicked) {
+            onSignalSelected(null);
+        }
     }
     canvasDragOrigin = null;
     canvasDragTranslation = null;
 }
 
-function onMouseMove(event) {
+// Handle mouse motion over the canvas. This is for dragging and hovering over items.
+function onCanvasMouseMove(event) {
     const rect = railMapCanvas[0].getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
@@ -83,16 +91,24 @@ function onMouseMove(event) {
         drawRailSystem();
     } else {
         hoveredElements = [];
-        const p = mousePointToWorld(event);
+        const p = getMousePoint(event);
         railSystem.signals.forEach(signal => {
             const sp = new DOMPoint(signal.position.x, signal.position.z, 0, 1);
-            const dist = Math.sqrt(Math.pow(p.x - sp.x, 2) + Math.pow(p.y - sp.y, 2));
-            if (dist < 1) {
+            const canvasSp = worldPointToCanvas(sp);
+            const dist = Math.sqrt(Math.pow(p.x - canvasSp.x, 2) + Math.pow(p.y - canvasSp.y, 2));
+            if (dist < 5) {
                 hoveredElements.push(signal);
             }
         });
         drawRailSystem();
     }
+}
+
+function getMousePoint(event) {
+    const rect = railMapCanvas[0].getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    return new DOMPoint(x, y, 0, 1);
 }
 
 function railSystemChanged() {
@@ -102,14 +118,30 @@ function railSystemChanged() {
         .done(signals => {
             railSystem.signals = signals;
             let bb = getRailSystemBoundingBox();
-            // canvasTranslation.x = -1 * (bb.x + (bb.width / 2));
-            // canvasTranslation.y = -1 * (bb.y + (bb.height / 2));
-            // canvasScaleIndex = SCALE_INDEX_NORMAL;
+            canvasTranslation.x = -1 * (bb.x + (bb.width / 2));
+            canvasTranslation.y = -1 * (bb.y + (bb.height / 2));
+            canvasScaleIndex = SCALE_INDEX_NORMAL;
             drawRailSystem();
-            window.setTimeout(railSystemChanged, 1000);
         });
     $.get("/api/railSystems/" + railSystem.id + "/branches")
         .done(branches => {
             railSystem.branches = branches;
         });
+}
+
+function selectSignalById(id) {
+    railSystem.signals.forEach(signal => {
+        if (signal.id === id) {
+            onSignalSelected(signal);
+        }
+    });
+}
+
+function onSignalSelected(signal) {
+    const dp = $('#railMapDetailPanel');
+    dp.empty();
+    if (signal !== null) {
+        const tpl = Handlebars.compile($('#signalTemplate').html());
+        dp.html(tpl(signal));
+    }
 }

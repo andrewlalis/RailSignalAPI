@@ -6,8 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nl.andrewl.railsignalapi.dao.BranchRepository;
 import nl.andrewl.railsignalapi.dao.RailSystemRepository;
+import nl.andrewl.railsignalapi.dao.SignalBranchConnectionRepository;
 import nl.andrewl.railsignalapi.dao.SignalRepository;
 import nl.andrewl.railsignalapi.model.*;
+import nl.andrewl.railsignalapi.rest.dto.SignalConnectionsUpdatePayload;
 import nl.andrewl.railsignalapi.rest.dto.SignalCreationPayload;
 import nl.andrewl.railsignalapi.rest.dto.SignalResponse;
 import nl.andrewl.railsignalapi.websocket.BranchUpdateMessage;
@@ -32,6 +34,7 @@ public class SignalService {
 	private final RailSystemRepository railSystemRepository;
 	private final SignalRepository signalRepository;
 	private final BranchRepository branchRepository;
+	private final SignalBranchConnectionRepository signalBranchConnectionRepository;
 
 	private final ObjectMapper mapper = new ObjectMapper();
 	private final Map<WebSocketSession, Set<Long>> signalWebSocketSessions = new ConcurrentHashMap<>();
@@ -43,6 +46,14 @@ public class SignalService {
 		if (signalRepository.existsByNameAndRailSystem(payload.name(), rs)) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Signal " + payload.name() + " already exists.");
 		}
+		if (payload.branchConnections().size() != 2) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exactly two branch connections must be provided.");
+		}
+		// Ensure that the directions of the connections are opposite each other.
+		Direction dir1 = Direction.parse(payload.branchConnections().get(0).direction());
+		Direction dir2 = Direction.parse(payload.branchConnections().get(1).direction());
+		if (!dir1.isOpposite(dir2)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Branch connections must be opposite each other.");
+
 		Set<SignalBranchConnection> branchConnections = new HashSet<>();
 		Signal signal = new Signal(rs, payload.name(), payload.position(), branchConnections);
 		for (var branchData : payload.branchConnections()) {
@@ -58,6 +69,39 @@ public class SignalService {
 			branchConnections.add(new SignalBranchConnection(signal, branch, dir));
 		}
 		signal = signalRepository.save(signal);
+		return new SignalResponse(signal);
+	}
+
+	@Transactional
+	public SignalResponse updateSignalBranchConnections(long rsId, long sigId, SignalConnectionsUpdatePayload payload) {
+		var signal = signalRepository.findByIdAndRailSystemId(sigId, rsId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		for (var c : payload.connections()) {
+			var fromConnection = signalBranchConnectionRepository.findById(c.from())
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not find signal branch connection: " + c.from()));
+			if (!fromConnection.getSignal().getId().equals(signal.getId())) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can only update signal branch connections originating from the specified signal.");
+			}
+			var toConnection = signalBranchConnectionRepository.findById(c.to())
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not find signal branch connection: " + c.to()));
+			if (!fromConnection.getBranch().getId().equals(toConnection.getBranch().getId())) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Signal branch connections can only path via a mutual branch.");
+			}
+			fromConnection.getReachableSignalConnections().add(toConnection);
+			signalBranchConnectionRepository.save(fromConnection);
+		}
+		for (var con : signal.getBranchConnections()) {
+			Set<SignalBranchConnection> connectionsToRemove = new HashSet<>();
+			for (var reachableCon : con.getReachableSignalConnections()) {
+				if (!payload.connections().contains(new SignalConnectionsUpdatePayload.ConnectionData(con.getId(), reachableCon.getId()))) {
+					connectionsToRemove.add(reachableCon);
+				}
+			}
+			con.getReachableSignalConnections().removeAll(connectionsToRemove);
+			signalBranchConnectionRepository.save(con);
+		}
+		// Reload the signal.
+		signal = signalRepository.findById(signal.getId()).orElseThrow();
 		return new SignalResponse(signal);
 	}
 

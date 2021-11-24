@@ -41,6 +41,7 @@ public record SignalResponse(
 					c.getReachableSignalConnections().stream()
 							.map(cc -> new ReachableConnectionData(
 									cc.getId(),
+									cc.getDirection().name(),
 									cc.getSignal().getId(),
 									cc.getSignal().getName(),
 									cc.getSignal().getPosition()
@@ -51,6 +52,7 @@ public record SignalResponse(
 
 		public static record ReachableConnectionData(
 				long connectionId,
+				String direction,
 				long signalId,
 				String signalName,
 				Position signalPosition

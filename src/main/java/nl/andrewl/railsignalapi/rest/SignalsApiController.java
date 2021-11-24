@@ -1,6 +1,7 @@
 package nl.andrewl.railsignalapi.rest;
 
 import lombok.RequiredArgsConstructor;
+import nl.andrewl.railsignalapi.rest.dto.SignalConnectionsUpdatePayload;
 import nl.andrewl.railsignalapi.rest.dto.SignalCreationPayload;
 import nl.andrewl.railsignalapi.rest.dto.SignalResponse;
 import nl.andrewl.railsignalapi.service.SignalService;
@@ -28,6 +29,11 @@ public class SignalsApiController {
 	@GetMapping(path = "/{sigId}")
 	public SignalResponse getSignal(@PathVariable long rsId, @PathVariable long sigId) {
 		return signalService.getSignal(rsId, sigId);
+	}
+
+	@PostMapping(path = "/{sigId}/signalConnections")
+	public SignalResponse updateSignalConnections(@PathVariable long rsId, @PathVariable long sigId, @RequestBody SignalConnectionsUpdatePayload payload) {
+		return signalService.updateSignalBranchConnections(rsId, sigId, payload);
 	}
 
 	@DeleteMapping(path = "/{sigId}")

@@ -18,7 +18,8 @@ public interface SignalRepository extends JpaRepository<Signal, Long> {
 
 	@Query("SELECT DISTINCT s FROM Signal s " +
 			"LEFT JOIN s.branchConnections bc " +
-			"WHERE bc.branch = :branch")
+			"WHERE bc.branch = :branch " +
+			"ORDER BY s.name")
 	List<Signal> findAllConnectedToBranch(Branch branch);
 
 	List<Signal> findAllByRailSystemOrderByName(RailSystem railSystem);
