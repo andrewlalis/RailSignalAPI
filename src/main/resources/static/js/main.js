@@ -145,8 +145,8 @@ function railSystemChanged() {
         });
 }
 
+// Updates the current rail system's information from the API.
 function railSystemUpdated() {
-    console.log("Refreshing...");
     $.get("/api/railSystems/" + railSystem.id + "/signals")
         .done(signals => {
             railSystem.signals = signals;
@@ -280,11 +280,12 @@ function addNewSignal() {
                     data: JSON.stringify(data),
                     contentType: "application/json"
                 })
-                    .done((response) => {
+                    .done(() => {
                         form.trigger("reset");
-                        railSystemChanged();
+                        railSystemUpdated();
                     })
                     .fail((response) => {
+                        console.error(response);
                         $('#addSignalAlertsContainer').append($('<div class="alert alert-danger">An error occurred.</div>'));
                         modal.show();
                     });
@@ -293,6 +294,22 @@ function addNewSignal() {
                 form.trigger("reset");
             });
     });
+}
+
+function removeSignal(signalId) {
+    confirm(`Are you sure you want to remove signal ${signalId}? This cannot be undone.`)
+        .then(() => {
+            $.ajax({
+                url: `/api/railSystems/${railSystem.id}/signals/${signalId}`,
+                type: "DELETE"
+            })
+                .always(() => {
+                    railSystemUpdated();
+                })
+                .fail((response) => {
+                    console.error(response);
+                })
+        })
 }
 
 function removeReachableConnection(signalId, fromId, toId) {
@@ -312,8 +329,8 @@ function removeReachableConnection(signalId, fromId, toId) {
                         data: JSON.stringify({connections: connections}),
                         contentType: "application/json"
                     })
-                        .done((response) => {
-                            railSystemChanged();
+                        .done(() => {
+                            railSystemUpdated();
                         })
                         .fail((response) => {
                             console.error(response);
@@ -348,7 +365,7 @@ function addReachableConnection(signalId, fromId, toId) {
                             data: JSON.stringify({connections: connections}),
                             contentType: "application/json"
                         })
-                            .done((response) => {
+                            .done(() => {
                                 railSystemChanged();
                             })
                             .fail((response) => {
