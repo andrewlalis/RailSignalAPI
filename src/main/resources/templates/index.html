@@ -43,9 +43,17 @@
         <div id="railMapDetailPanel" class="col p-2 border">
         </div>
     </div>
+
+    <hr class="my-4"/>
+
+    <div class="row">
+        <div class="col">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSignalModal">Add Signal</button>
+        </div>
+    </div>
 </div>
 
-<div style="display: none;">
+<div>
     <script id="signalTemplate" type="text/x-handlebars-template">
         <h3>{{name}}</h3>
         <hr>
@@ -65,20 +73,132 @@
             <dl class="row">
                 <dt class="col-sm-3">Branch</dt>
                 <dd class="col-sm-9">{{this.branch.name}} <small class="text-muted">{{this.branch.id}}</small></dd>
-                {{#if this.reachableSignalConnections.length}}
-                    <dt class="col-sm-3">Reachable Signals</dt>
-                    <dd class="col-sm-9">
-                        {{#each this.reachableSignalConnections}}
-                            <p><a onclick="selectSignalById({{this.signalId}})" href="#">{{this.signalName}}</a> <small class="text-muted">{{this.signalId}}</small> via {{this.direction}} connection {{this.connectionId}}</p>
-                        {{/each}}
-                    </dd>
-                {{/if}}
+                <dt class="col-sm-3">Reachable Signals</dt>
+                <dd class="col-sm-9">
+                    {{#each this.reachableSignalConnections}}
+                        <p>
+                            <a onclick="selectSignalById({{this.signalId}})" href="#">{{this.signalName}}</a>
+                            <small class="text-muted">{{this.signalId}}</small> via
+                            {{this.direction}} connection {{this.connectionId}}
+                            <span
+                                    class="btn btn-sm btn-danger js_removeSignalConnection"
+                                    onclick="removeReachableConnection({{../../id}}, {{../id}}, {{this.connectionId}})"
+                            >Remove</span>
+                        </p>
+                    {{/each}}
+                </dd>
             </dl>
+            <div class="row" id="signalPotentialConnectionsRow-{{this.id}}">
+                <div class="col-auto">
+                    <select id="signalPotentialConnectionsSelect-{{this.id}}" class="form-select form-select-sm">
+                        {{#each this.potentialSignalConnections}}
+                            <option value="{{this.connectionId}}">{{this.signalName}} via {{this.branchName}} on {{this.direction}} connection</option>
+                        {{/each}}
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="addReachableConnectionBtn({{../id}}, {{this.id}})">Add Connection</button>
+                </div>
+            </div>
         {{/each}}
     </script>
+
+    <div class="modal fade" tabindex="-1" id="confirmModal" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 id="confirmModalHeader">Confirm</h5>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmModalBody">Are you sure you want to continue?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="confirmModalCancelButton">Cancel</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="confirmModalOkButton">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" id="addSignalModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Signal</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Fill in the following data to add a new signal to the system.</p>
+                    <form id="addSignalForm">
+                        <div class="row mb-3">
+                            <div class="col">
+                                <input id="addSignalName" type="text" class="form-control" placeholder="Name" aria-label="Name" required>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <h6>Position</h6>
+                            <div class="col">
+                                <input id="addSignalPositionX" class="form-control" placeholder="X" aria-label="X" type="number" step="0.1" required>
+                            </div>
+                            <div class="col">
+                                <input id="addSignalPositionY" class="form-control" placeholder="Y" aria-label="Y" type="number" step="0.1" required>
+                            </div>
+                            <div class="col">
+                                <input id="addSignalPositionZ" class="form-control" placeholder="Z" aria-label="Z" type="number" step="0.1" required>
+                            </div>
+                        </div>
+                        <h6>Connections</h6>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <select id="addSignalFirstConnectionDirection" class="form-select" required>
+                                    <option value="N">North</option>
+                                    <option value="S">South</option>
+                                    <option value="E">East</option>
+                                    <option value="W">West</option>
+                                    <option value="NW">NorthWest</option>
+                                    <option value="NE">NorthEast</option>
+                                    <option value="SW">SouthWest</option>
+                                    <option value="SE">SouthEast</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <input id="addSignalFirstConnectionBranch" type="text" class="form-control" placeholder="Branch Name" list="addSignalFirstConnectionBranchList" required>
+                                <datalist id="addSignalFirstConnectionBranchList" class="js_branch_list">
+                                </datalist>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col">
+                                <select id="addSignalSecondConnectionDirection" class="form-select" required>
+                                    <option value="N">North</option>
+                                    <option value="S">South</option>
+                                    <option value="E">East</option>
+                                    <option value="W">West</option>
+                                    <option value="NW">NorthWest</option>
+                                    <option value="NE">NorthEast</option>
+                                    <option value="SW">SouthWest</option>
+                                    <option value="SE">SouthEast</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <input id="addSignalSecondConnectionBranch" type="text" class="form-control" placeholder="Branch Name" list="addSignalSecondConnectionBranchList" required>
+                                <datalist id="addSignalSecondConnectionBranchList" class="js_branch_list">
+                                </datalist>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="addSignalAlertsContainer"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="addNewSignal()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.7/handlebars.min.js" integrity="sha512-RNLkV3d+aLtfcpEyFG8jRbnWHxUqVZozacROI4J2F1sTaDqo1dPQYs01OMi1t1w9Y2FdbSCDSQ2ZVdAC8bzgAg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 

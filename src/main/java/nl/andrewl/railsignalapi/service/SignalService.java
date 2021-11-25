@@ -65,7 +65,7 @@ public class SignalService {
 				branch = this.branchRepository.findByNameAndRailSystem(branchData.name(), rs)
 						.orElse(new Branch(rs, branchData.name(), BranchStatus.FREE));
 			}
-			Direction dir = Direction.valueOf(branchData.direction().trim().toUpperCase());
+			Direction dir = Direction.parse(branchData.direction());
 			branchConnections.add(new SignalBranchConnection(signal, branch, dir));
 		}
 		signal = signalRepository.save(signal);

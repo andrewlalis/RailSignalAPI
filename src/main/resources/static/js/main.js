@@ -132,10 +132,34 @@ function railSystemChanged() {
             canvasTranslation.y = -1 * (bb.y + (bb.height / 2));
             canvasScaleIndex = SCALE_INDEX_NORMAL;
             drawRailSystem();
+            window.setInterval(railSystemUpdated, 1000);
         });
     $.get("/api/railSystems/" + railSystem.id + "/branches")
         .done(branches => {
             railSystem.branches = branches;
+            const branchSelects = $('.js_branch_list');
+            branchSelects.empty();
+            railSystem.branches.forEach(branch => {
+                branchSelects.append($('<option value="' + branch.name + '"></option>'))
+            });
+        });
+}
+
+function railSystemUpdated() {
+    console.log("Refreshing...");
+    $.get("/api/railSystems/" + railSystem.id + "/signals")
+        .done(signals => {
+            railSystem.signals = signals;
+            drawRailSystem();
+        });
+    $.get("/api/railSystems/" + railSystem.id + "/branches")
+        .done(branches => {
+            railSystem.branches = branches;
+            const branchSelects = $('.js_branch_list');
+            branchSelects.empty();
+            railSystem.branches.forEach(branch => {
+                branchSelects.append($('<option value="' + branch.name + '"></option>'))
+            });
         });
 }
 
@@ -152,6 +176,29 @@ function onSignalSelected(signal) {
     if (signal !== null) {
         const tpl = Handlebars.compile($('#signalTemplate').html());
         detailPanel.html(tpl(signal));
+        signal.branchConnections.forEach(con => {
+            const select = $('#signalPotentialConnectionsSelect-' + con.id);
+            $.get("/api/railSystems/" + railSystem.id + "/branches/" + con.branch.id + "/signals")
+                .done(signals => {
+                    signals = signals.filter(s => s.id !== signal.id);
+                    let connections = [];
+                    signals.forEach(s => {
+                        s.branchConnections
+                            .filter(c => c.branch.id === con.branch.id && !con.reachableSignalConnections.some(rc => rc.connectionId === c.id))
+                            .forEach(potentialConnection => {
+                                potentialConnection.signalName = s.name;
+                                potentialConnection.signalId = s.id;
+                                connections.push(potentialConnection);
+                            });
+                    });
+                    select.empty();
+                    const row = $('#signalPotentialConnectionsRow-' + con.id);
+                    row.toggle(connections.length > 0);
+                    connections.forEach(c => {
+                        select.append($(`<option value="${c.id}">${c.signalName} via ${c.direction} connection ${c.id}</option>`))
+                    });
+                });
+        });
     }
 }
 
@@ -172,12 +219,15 @@ function addRailSystem() {
 
 function deleteRailSystem() {
     if (railSystem !== null && railSystem.id) {
-        $.ajax({
-            url: "/api/railSystems/" + railSystem.id,
-            type: "DELETE"
-        })
-            .always(() => {
-                refreshRailSystems(true);
+        confirm("Are you sure you want to permanently remove rail system " + railSystem.id + "?")
+            .then(() => {
+                $.ajax({
+                    url: "/api/railSystems/" + railSystem.id,
+                    type: "DELETE"
+                })
+                    .always(() => {
+                        refreshRailSystems(true);
+                    });
             });
     }
 }
@@ -195,4 +245,135 @@ function refreshRailSystems(selectFirst) {
                 railSystemSelect.change();
             }
         });
+}
+
+function addNewSignal() {
+    const modalElement = $('#addSignalModal');
+    const form = $('#addSignalForm');
+    form.validate();
+    if (!form.valid()) return;
+    const data = {
+        name: $('#addSignalName').val().trim(),
+        position: {
+            x: $('#addSignalPositionX').val(),
+            y: $('#addSignalPositionY').val(),
+            z: $('#addSignalPositionZ').val()
+        },
+        branchConnections: [
+            {
+                direction: $('#addSignalFirstConnectionDirection').val(),
+                name: $('#addSignalFirstConnectionBranch').val()
+            },
+            {
+                direction: $('#addSignalSecondConnectionDirection').val(),
+                name: $('#addSignalSecondConnectionBranch').val()
+            }
+        ]
+    };
+    const modal = bootstrap.Modal.getInstance(modalElement[0]);
+    modal.hide();
+    modalElement.on("hidden.bs.modal", () => {
+        confirm("Are you sure you want to add this new signal to the system?")
+            .then(() => {
+                $.post({
+                    url: "/api/railSystems/" + railSystem.id + "/signals",
+                    data: JSON.stringify(data),
+                    contentType: "application/json"
+                })
+                    .done((response) => {
+                        form.trigger("reset");
+                        railSystemChanged();
+                    })
+                    .fail((response) => {
+                        $('#addSignalAlertsContainer').append($('<div class="alert alert-danger">An error occurred.</div>'));
+                        modal.show();
+                    });
+            })
+            .catch(() => {
+                form.trigger("reset");
+            });
+    });
+}
+
+function removeReachableConnection(signalId, fromId, toId) {
+    confirm(`Are you sure you want to remove the connection from ${fromId} to ${toId} from signal ${signalId}?`)
+        .then(() => {
+            $.get(`/api/railSystems/${railSystem.id}/signals/${signalId}`)
+                .done(signal => {
+                    let connections = [];
+                    signal.branchConnections.forEach(con => {
+                        con.reachableSignalConnections.forEach(reachableCon => {
+                            connections.push({from: con.id, to: reachableCon.connectionId});
+                        });
+                    });
+                    connections = connections.filter(c => !(c.from === fromId && c.to === toId));
+                    $.post({
+                        url: `/api/railSystems/${railSystem.id}/signals/${signal.id}/signalConnections`,
+                        data: JSON.stringify({connections: connections}),
+                        contentType: "application/json"
+                    })
+                        .done((response) => {
+                            railSystemChanged();
+                        })
+                        .fail((response) => {
+                            console.error(response);
+                        });
+                });
+        });
+}
+
+function addReachableConnectionBtn(signalId, fromId) {
+    const select = $('#signalPotentialConnectionsSelect-' + fromId);
+    const toId = select.val();
+    if (toId) {
+        addReachableConnection(signalId, fromId, toId);
+    }
+}
+
+function addReachableConnection(signalId, fromId, toId) {
+    confirm(`Are you sure you want to add a connection from ${fromId} to ${toId} from signal ${signalId}?`)
+        .then(() => {
+            $.get(`/api/railSystems/${railSystem.id}/signals/${signalId}`)
+                .done(signal => {
+                    let connections = [];
+                    signal.branchConnections.forEach(con => {
+                        con.reachableSignalConnections.forEach(reachableCon => {
+                            connections.push({from: con.id, to: reachableCon.connectionId});
+                        });
+                    });
+                    if (!connections.find(c => c.from === fromId && c.to === toId)) {
+                        connections.push({from: fromId, to: toId});
+                        $.post({
+                            url: `/api/railSystems/${railSystem.id}/signals/${signal.id}/signalConnections`,
+                            data: JSON.stringify({connections: connections}),
+                            contentType: "application/json"
+                        })
+                            .done((response) => {
+                                railSystemChanged();
+                            })
+                            .fail((response) => {
+                                console.error(response);
+                            });
+                    }
+                });
+        });
+}
+
+function confirm(message) {
+    const modalElement = $('#confirmModal');
+    if (message) {
+        $('#confirmModalBody').html(message);
+    } else {
+        $('#confirmModalBody').html("Are you sure you want to continue?");
+    }
+    const modal = new bootstrap.Modal(modalElement[0], {keyboard: false});
+    modal.show();
+    return new Promise((resolve, reject) => {
+        $('#confirmModalOkButton').click(() => {
+            modalElement.on("hidden.bs.modal", () => resolve());
+        });
+        $('#confirmModalCancelButton').click(() => {
+            modalElement.on("hidden.bs.modal", () => reject());
+        });
+    });
 }
