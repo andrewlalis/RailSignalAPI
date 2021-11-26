@@ -32,15 +32,7 @@ $(document).ready(() => {
 
     detailPanel = $('#railMapDetailPanel');
 
-    $.get("/api/railSystems")
-        .done(railSystems => {
-            railSystems.forEach(railSystem => {
-                let option = $('<option value="' + railSystem.id + '">' + railSystem.name + '</option>')
-                railSystemSelect.append(option);
-            });
-            railSystemSelect.val(railSystems[0].id);
-            railSystemSelect.change();
-        });
+    refreshRailSystems(true);
 });
 
 // Handle mouse scrolling within the context of the canvas.
@@ -237,7 +229,7 @@ function refreshRailSystems(selectFirst) {
         .done(railSystems => {
             railSystemSelect.empty();
             railSystems.forEach(railSystem => {
-                let option = $('<option value="' + railSystem.id + '">' + railSystem.name + '</option>')
+                let option = $(`<option value="${railSystem.id}">${railSystem.name} - ID: ${railSystem.id}</option>`)
                 railSystemSelect.append(option);
             });
             if (selectFirst) {
