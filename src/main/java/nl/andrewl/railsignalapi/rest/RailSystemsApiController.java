@@ -25,6 +25,11 @@ public class RailSystemsApiController {
 		return railSystemService.createRailSystem(payload);
 	}
 
+	@GetMapping(path = "/{rsId}")
+	public RailSystemResponse getRailSystem(@PathVariable long rsId) {
+		return railSystemService.getRailSystem(rsId);
+	}
+
 	@DeleteMapping(path = "/{rsId}")
 	public ResponseEntity<?> deleteRailSystem(@PathVariable long rsId) {
 		railSystemService.delete(rsId);

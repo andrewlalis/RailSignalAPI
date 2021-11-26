@@ -46,4 +46,11 @@ public class RailSystemService {
 		branchRepository.deleteAll(branches);
 		railSystemRepository.delete(rs);
 	}
+
+	@Transactional(readOnly = true)
+	public RailSystemResponse getRailSystem(long rsId) {
+		var rs = railSystemRepository.findById(rsId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		return new RailSystemResponse(rs);
+	}
 }
