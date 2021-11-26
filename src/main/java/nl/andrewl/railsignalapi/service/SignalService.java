@@ -201,10 +201,12 @@ public class SignalService {
 
 	private void broadcastToConnectedSignals(Branch branch) {
 		try {
-			WebSocketMessage<String> msg = new TextMessage(mapper.writeValueAsString(new BranchUpdateMessage(branch.getId(), branch.getStatus().name())));
+			WebSocketMessage<String> msg = new TextMessage(mapper.writeValueAsString(
+					new BranchUpdateMessage(branch.getId(), branch.getStatus().name())
+			));
 			signalRepository.findAllConnectedToBranch(branch).stream()
 					.map(s -> getSignalWebSocketSession(s.getId()))
-					.filter(Objects::nonNull)
+					.filter(Objects::nonNull).distinct()
 					.forEach(session -> {
 						try {
 							session.sendMessage(msg);
