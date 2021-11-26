@@ -15,3 +15,5 @@ To begin controlling your signals from within the game, you can set up a signal 
 pastebin run Z72QhG7G
 ```
 This will run an installation script that will guide you through setting up your signal's configuration.
+
+See [here](https://imgur.com/a/685HV7d) for some examples of how to build the signal structures within your world.
