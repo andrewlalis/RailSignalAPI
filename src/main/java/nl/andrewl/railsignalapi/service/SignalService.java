@@ -9,6 +9,7 @@ import nl.andrewl.railsignalapi.dao.RailSystemRepository;
 import nl.andrewl.railsignalapi.dao.SignalBranchConnectionRepository;
 import nl.andrewl.railsignalapi.dao.SignalRepository;
 import nl.andrewl.railsignalapi.model.*;
+import nl.andrewl.railsignalapi.model.component.SignalBranchConnection;
 import nl.andrewl.railsignalapi.rest.dto.SignalConnectionsUpdatePayload;
 import nl.andrewl.railsignalapi.rest.dto.SignalCreationPayload;
 import nl.andrewl.railsignalapi.rest.dto.SignalResponse;

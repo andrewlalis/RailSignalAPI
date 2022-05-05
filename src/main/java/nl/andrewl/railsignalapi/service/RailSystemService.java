@@ -1,9 +1,9 @@
 package nl.andrewl.railsignalapi.service;
 
 import lombok.RequiredArgsConstructor;
-import nl.andrewl.railsignalapi.dao.BranchRepository;
+import nl.andrewl.railsignalapi.dao.ComponentRepository;
 import nl.andrewl.railsignalapi.dao.RailSystemRepository;
-import nl.andrewl.railsignalapi.dao.SignalRepository;
+import nl.andrewl.railsignalapi.dao.SegmentRepository;
 import nl.andrewl.railsignalapi.model.RailSystem;
 import nl.andrewl.railsignalapi.rest.dto.RailSystemCreationPayload;
 import nl.andrewl.railsignalapi.rest.dto.RailSystemResponse;
@@ -19,8 +19,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RailSystemService {
 	private final RailSystemRepository railSystemRepository;
-	private final SignalRepository signalRepository;
-	private final BranchRepository branchRepository;
+	private final SegmentRepository segmentRepository;
+	private final ComponentRepository componentRepository;
 
 	@Transactional
 	public List<RailSystemResponse> getRailSystems() {
@@ -40,10 +40,8 @@ public class RailSystemService {
 	public void delete(long rsId) {
 		var rs = railSystemRepository.findById(rsId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-		var signals = signalRepository.findAllByRailSystemOrderByName(rs);
-		signalRepository.deleteAll(signals);
-		var branches = branchRepository.findAllByRailSystemOrderByName(rs);
-		branchRepository.deleteAll(branches);
+		componentRepository.deleteAllByRailSystem(rs);
+		segmentRepository.deleteAllByRailSystem(rs);
 		railSystemRepository.delete(rs);
 	}
 

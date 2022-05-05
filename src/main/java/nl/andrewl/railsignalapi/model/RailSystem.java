@@ -8,6 +8,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
+/**
+ * Represents a closed system that contains a collection of components.
+ */
 @Entity
 @Getter
 @NoArgsConstructor
@@ -16,6 +19,9 @@ public class RailSystem {
 	@GeneratedValue
 	private Long id;
 
+	/**
+	 * The name of this system.
+	 */
 	@Column(nullable = false, unique = true)
 	private String name;
 
