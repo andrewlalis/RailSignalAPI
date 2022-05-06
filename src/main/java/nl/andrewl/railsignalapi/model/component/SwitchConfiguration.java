@@ -1,5 +1,7 @@
 package nl.andrewl.railsignalapi.model.component;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -10,7 +12,8 @@ import java.util.Set;
  * as an active configuration in the linked switch component.
  */
 @Entity
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class SwitchConfiguration {
 	@Id
 	@GeneratedValue
@@ -28,4 +31,17 @@ public class SwitchConfiguration {
 	 */
 	@ManyToMany(fetch = FetchType.EAGER)
 	private Set<PathNode> nodes;
+
+	public SwitchConfiguration(Switch switchComponent, Set<PathNode> nodes) {
+		this.switchComponent = switchComponent;
+		this.nodes = nodes;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == this) return true;
+		return o instanceof SwitchConfiguration sc &&
+				sc.switchComponent.equals(this.switchComponent) &&
+				sc.nodes.equals(this.nodes);
+	}
 }

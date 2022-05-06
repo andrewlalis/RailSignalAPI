@@ -26,7 +26,7 @@ public class SegmentBoundaryNode extends PathNode {
 	private Set<Segment> segments;
 
 	public SegmentBoundaryNode(RailSystem railSystem, Position position, String name, Set<PathNode> connectedNodes, Set<Segment> segments) {
-		super(railSystem, position, name, connectedNodes);
+		super(railSystem, position, name, ComponentType.SEGMENT_BOUNDARY, connectedNodes);
 		this.segments = segments;
 	}
 }

@@ -20,7 +20,7 @@ import java.util.List;
 public class RailSystemService {
 	private final RailSystemRepository railSystemRepository;
 	private final SegmentRepository segmentRepository;
-	private final ComponentRepository componentRepository;
+	private final ComponentRepository<?> componentRepository;
 
 	@Transactional
 	public List<RailSystemResponse> getRailSystems() {
@@ -29,10 +29,13 @@ public class RailSystemService {
 
 	@Transactional
 	public RailSystemResponse createRailSystem(RailSystemCreationPayload payload) {
-		if (railSystemRepository.existsByName(payload.name())) {
+		if (payload.name() == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing required name.");
+		if (payload.name().isBlank()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Name cannot be blank.");
+		String name = payload.name().trim();
+		if (railSystemRepository.existsByName(name)) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A rail system with that name already exists.");
 		}
-		RailSystem rs = new RailSystem(payload.name());
+		RailSystem rs = new RailSystem(name);
 		return new RailSystemResponse(railSystemRepository.save(rs));
 	}
 

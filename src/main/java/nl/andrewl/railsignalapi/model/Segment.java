@@ -7,6 +7,7 @@ import nl.andrewl.railsignalapi.model.component.SegmentBoundaryNode;
 import nl.andrewl.railsignalapi.model.component.Signal;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -27,7 +28,7 @@ public class Segment {
 	/**
 	 * A unique name for this segment.
 	 */
-	@Column(unique = true)
+	@Column
 	private String name;
 
 	/**
@@ -39,8 +40,15 @@ public class Segment {
 	/**
 	 * The set of nodes from which trains can enter and exit this segment.
 	 */
-	@ManyToMany(mappedBy = "segments", cascade = CascadeType.ALL)
+	@ManyToMany(mappedBy = "segments")
 	private Set<SegmentBoundaryNode> boundaryNodes;
+
+	public Segment(RailSystem railSystem, String name) {
+		this.railSystem = railSystem;
+		this.name = name;
+		this.signals = new HashSet<>();
+		this.boundaryNodes = new HashSet<>();
+	}
 
 	@Override
 	public boolean equals(Object o) {

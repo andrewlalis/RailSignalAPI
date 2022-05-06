@@ -37,8 +37,14 @@ public abstract class Component {
 	/**
 	 * A human-readable name for the component.
 	 */
-	@Column(unique = true)
+	@Column
 	private String name;
+
+	/**
+	 * The type of this component.
+	 */
+	@Enumerated(EnumType.ORDINAL)
+	private ComponentType type;
 
 	/**
 	 * Whether this component is online, meaning that an in-world device is
@@ -48,15 +54,25 @@ public abstract class Component {
 	@Setter
 	private boolean online = false;
 
-	public Component(RailSystem railSystem, Position position, String name) {
+	public Component(RailSystem railSystem, Position position, String name, ComponentType type) {
 		this.railSystem = railSystem;
 		this.position = position;
 		this.name = name;
+		this.type = type;
 	}
 
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		return o instanceof Component c && this.id != null && this.id.equals(c.id);
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(id);
+		if (name != null) sb.append('[').append(name).append(']');
+		sb.append(String.format("@[x=%.1f,y=%.1f,z=%.1f]", position.getX(), position.getY(), position.getZ()));
+		return sb.toString();
 	}
 }

@@ -3,6 +3,8 @@ package nl.andrewl.railsignalapi.model.component;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import nl.andrewl.railsignalapi.model.RailSystem;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -22,8 +24,16 @@ public class Switch extends PathNode {
 	private Set<SwitchConfiguration> possibleConfigurations;
 
 	/**
-	 * The switch configuration that this switch is currently in.
+	 * The switch configuration that this switch is currently in. If null, then
+	 * we don't know what configuration the switch is in.
 	 */
-	@OneToOne(optional = false, fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.LAZY)
+	@Setter
 	private SwitchConfiguration activeConfiguration;
+
+	public Switch(RailSystem railSystem, Position position, String name, Set<PathNode> connectedNodes, Set<SwitchConfiguration> possibleConfigurations, SwitchConfiguration activeConfiguration) {
+		super(railSystem, position, name, ComponentType.SWITCH, connectedNodes);
+		this.possibleConfigurations = possibleConfigurations;
+		this.activeConfiguration = activeConfiguration;
+	}
 }

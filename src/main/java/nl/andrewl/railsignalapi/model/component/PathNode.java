@@ -19,15 +19,15 @@ import java.util.Set;
 @Inheritance(strategy = InheritanceType.JOINED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class PathNode extends Component {
+public abstract class PathNode extends Component {
 	/**
 	 * The set of nodes that this one is connected to.
 	 */
 	@ManyToMany
 	private Set<PathNode> connectedNodes;
 
-	public PathNode(RailSystem railSystem, Position position, String name, Set<PathNode> connectedNodes) {
-		super(railSystem, position, name);
+	public PathNode(RailSystem railSystem, Position position, String name, ComponentType type, Set<PathNode> connectedNodes) {
+		super(railSystem, position, name, type);
 		this.connectedNodes = connectedNodes;
 	}
 }
