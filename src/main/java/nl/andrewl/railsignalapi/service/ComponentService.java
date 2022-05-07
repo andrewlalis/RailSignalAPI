@@ -128,7 +128,8 @@ public class ComponentService {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 		if (!(c instanceof PathNode p)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Component is not a PathNode.");
 		Set<PathNode> newNodes = new HashSet<>();
-		for (var id : payload.connectedNodeIds()) {
+		for (var nodeObj : payload.connectedNodes) {
+			long id = nodeObj.id;
 			var c1 = componentRepository.findByIdAndRailSystemId(id, rsId);
 			if (c1.isPresent() && c1.get() instanceof PathNode pn) {
 				newNodes.add(pn);
@@ -136,8 +137,23 @@ public class ComponentService {
 				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Component with id " + id + " is not a PathNode in the same rail system.");
 			}
 		}
-		p.getConnectedNodes().retainAll(newNodes);
-		p.getConnectedNodes().addAll(newNodes);
+
+		Set<PathNode> nodesToRemove = new HashSet<>(p.getConnectedNodes());
+		nodesToRemove.removeAll(newNodes);
+
+		Set<PathNode> nodesToAdd = new HashSet<>(newNodes);
+		nodesToAdd.removeAll(p.getConnectedNodes());
+
+		p.getConnectedNodes().removeAll(nodesToRemove);
+		p.getConnectedNodes().addAll(nodesToAdd);
+		for (var node : nodesToRemove) {
+			node.getConnectedNodes().remove(p);
+		}
+		for (var node : nodesToAdd) {
+			node.getConnectedNodes().add(p);
+		}
+		componentRepository.saveAll(nodesToRemove);
+		componentRepository.saveAll(nodesToAdd);
 		p = componentRepository.save(p);
 		return ComponentResponse.of(p);
 	}

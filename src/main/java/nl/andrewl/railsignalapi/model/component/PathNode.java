@@ -5,10 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import nl.andrewl.railsignalapi.model.RailSystem;
 
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.ManyToMany;
+import javax.persistence.*;
 import java.util.Set;
 
 /**
@@ -23,7 +20,7 @@ public abstract class PathNode extends Component {
 	/**
 	 * The set of nodes that this one is connected to.
 	 */
-	@ManyToMany
+	@ManyToMany(cascade = CascadeType.DETACH)
 	private Set<PathNode> connectedNodes;
 
 	public PathNode(RailSystem railSystem, Position position, String name, ComponentType type, Set<PathNode> connectedNodes) {

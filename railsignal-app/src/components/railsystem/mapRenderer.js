@@ -3,6 +3,8 @@ This component is responsible for the rendering of a RailSystem in a 2d map
 view.
  */
 
+import {drawComponent, drawConnectedNodes} from "./drawing";
+
 const SCALE_VALUES = [0.01, 0.1, 0.25, 0.5, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, 10.0, 12.0, 16.0, 20.0, 30.0, 45.0, 60.0, 80.0, 100.0];
 const SCALE_INDEX_NORMAL = 7;
 const HOVER_RADIUS = 10;
@@ -50,6 +52,13 @@ export function draw() {
     ctx.setTransform(worldTx);
 
     for (let i = 0; i < railSystem.components.length; i++) {
+        const c = railSystem.components[i];
+        if (c.connectedNodes !== undefined && c.connectedNodes !== null) {
+            drawConnectedNodes(ctx, worldTx, c);
+        }
+    }
+
+    for (let i = 0; i < railSystem.components.length; i++) {
         drawComponent(ctx, worldTx, railSystem.components[i]);
     }
 
@@ -70,50 +79,6 @@ export function draw() {
     }
 }
 
-function drawComponent(ctx, worldTx, component) {
-    const tx = DOMMatrix.fromMatrix(worldTx);
-    tx.translateSelf(component.position.x, component.position.z, 0);
-    const s = getScaleFactor();
-    tx.scaleSelf(1/s, 1/s, 1/s);
-    tx.scaleSelf(5, 5, 5);
-    ctx.setTransform(tx);
-    if (isComponentHovered(component)) {
-        ctx.fillStyle = `rgba(255, 255, 0, 32)`;
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 1.8, 1.8, 0, 0, Math.PI * 2);
-        ctx.fill();
-    }
-    if (component.type === "SIGNAL") {
-        drawSignal(ctx, component);
-    } else if (component.type === "SEGMENT_BOUNDARY") {
-        drawSegmentBoundary(ctx, component);
-    }
-}
-
-function drawSignal(ctx, signal) {
-    roundedRect(ctx, -0.7, -1, 1.4, 2, 0.25);
-    ctx.fillStyle = "black";
-    ctx.fill();
-
-    // ctx.fillStyle = "green";
-    // ctx.beginPath();
-    // ctx.ellipse(0, 0, 0.8, 0.8, 0, 0, Math.PI * 2);
-    // ctx.fill();
-    //
-    // ctx.strokeStyle = "black";
-    // ctx.lineWidth = 0.5;
-    // ctx.beginPath();
-    // ctx.ellipse(0, 0, 1, 1, 0, 0, Math.PI * 2);
-    // ctx.stroke();
-}
-
-function drawSegmentBoundary(ctx, segmentBoundary) {
-    ctx.fillStyle = "blue";
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 1, 1, 0, 0, Math.PI * 2);
-    ctx.fill();
-}
-
 export function getScaleFactor() {
     return SCALE_VALUES[mapScaleIndex];
 }
@@ -131,7 +96,7 @@ function getWorldTransform() {
     return tx;
 }
 
-function isComponentHovered(component) {
+export function isComponentHovered(component) {
     for (let i = 0; i < hoveredElements.length; i++) {
         if (hoveredElements[i].id === component.id) return true;
     }
@@ -156,18 +121,6 @@ function worldPointToMap(p) {
     return getWorldTransform().transformPoint(p);
 }
 
-function roundedRect(ctx, x, y, w, h, r) {
-    if (w < 2 * r) r = w / 2;
-    if (h < 2 * r) r = h / 2;
-    ctx.beginPath();
-    ctx.moveTo(x+r, y);
-    ctx.arcTo(x+w, y,   x+w, y+h, r);
-    ctx.arcTo(x+w, y+h, x,   y+h, r);
-    ctx.arcTo(x,   y+h, x,   y,   r);
-    ctx.arcTo(x,   y,   x+w, y,   r);
-    ctx.closePath();
-}
-
 /*
 EVENT HANDLING
 */
@@ -184,6 +137,7 @@ function onMouseWheel(event) {
     }
     draw();
     event.stopPropagation();
+    return false;
 }
 
 /**

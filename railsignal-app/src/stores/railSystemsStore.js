@@ -54,10 +54,11 @@ export const useRailSystemsStore = defineStore('RailSystemsStore', {
                     });
             });
         },
-        refreshComponents(rs) {
+        refreshAllComponents(rs) {
             return new Promise(resolve => {
                 axios.get(`${this.apiUrl}/rs/${rs.id}/c`)
                     .then(response => {
+                        rs.selectedComponent = null;
                         rs.components = response.data;
                         resolve();
                     });
@@ -66,7 +67,7 @@ export const useRailSystemsStore = defineStore('RailSystemsStore', {
         fetchSelectedRailSystemData() {
             if (!this.selectedRailSystem) return;
             this.refreshSegments(this.selectedRailSystem);
-            this.refreshComponents(this.selectedRailSystem);
+            this.refreshAllComponents(this.selectedRailSystem);
         },
         addSegment(name) {
             const rs = this.selectedRailSystem;
@@ -83,13 +84,13 @@ export const useRailSystemsStore = defineStore('RailSystemsStore', {
         addComponent(data) {
             const rs = this.selectedRailSystem;
             axios.post(`${this.apiUrl}/rs/${rs.id}/c`, data)
-                .then(() => this.refreshComponents(rs))
+                .then(() => this.refreshAllComponents(rs))
                 .catch(error => console.log(error));
         },
         removeComponent(id) {
             const rs = this.selectedRailSystem;
             axios.delete(`${this.apiUrl}/rs/${rs.id}/c/${id}`)
-                .then(() => this.refreshComponents(rs))
+                .then(() => this.refreshAllComponents(rs))
                 .catch(error => console.log(error));
         },
         fetchComponentData(component) {
@@ -99,6 +100,51 @@ export const useRailSystemsStore = defineStore('RailSystemsStore', {
                     .then(response => resolve(response.data))
                     .catch(error => console.log(error));
             });
+        },
+        refreshComponents(components) {
+            const rs = this.selectedRailSystem;
+            for (let i = 0; i < components.length; i++) {
+                axios.get(`${this.apiUrl}/rs/${rs.id}/c/${components[i].id}`)
+                    .then(resp => {
+                        const idx = this.selectedRailSystem.components.findIndex(c => c.id === resp.data.id);
+                        if (idx > -1) this.selectedRailSystem.components[idx] = resp.data;
+                    })
+                    .catch(error => console.log(error));
+            }
+        },
+        updateConnections(pathNode) {
+            const rs = this.selectedRailSystem;
+            return new Promise(resolve => {
+                axios.patch(
+                    `${this.apiUrl}/rs/${rs.id}/c/${pathNode.id}/connectedNodes`,
+                    pathNode
+                )
+                    .then(response => {
+                        pathNode.connectedNodes = response.data.connectedNodes;
+                        resolve();
+                    })
+                    .catch(error => console.log(error));
+            });
+        },
+        addConnection(pathNode, other) {
+            pathNode.connectedNodes.push(other);
+            this.updateConnections(pathNode)
+                .then(() => {
+                    this.refreshComponents(pathNode.connectedNodes);
+                });
+        },
+        removeConnection(pathNode, other) {
+            const idx = pathNode.connectedNodes.findIndex(n => n.id === other.id);
+            if (idx > -1) {
+                pathNode.connectedNodes.splice(idx, 1);
+                this.updateConnections(pathNode)
+                    .then(() => {
+                        const nodes = [];
+                        nodes.push(pathNode.connectedNodes);
+                        nodes.push(other);
+                        this.refreshComponents(nodes);
+                    })
+            }
         }
     }
 });

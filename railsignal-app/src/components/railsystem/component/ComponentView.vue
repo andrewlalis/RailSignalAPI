@@ -15,16 +15,16 @@
     </p>
     <SignalComponentView v-if="component.type === 'SIGNAL'" :signal="component" />
     <SegmentBoundaryNodeComponentView v-if="component.type === 'SEGMENT_BOUNDARY'" :node="component" />
-    <PathNodeComponentView v-if="component.connectedNodes" :pathNode="component" />
+    <PathNodeComponentView v-if="component.connectedNodes" :pathNode="component" :railSystem="railSystem" />
     <button @click="rsStore.removeComponent(component.id)">Remove</button>
   </div>
 </template>
 
 <script>
-import {useRailSystemsStore} from "../../../stores/railSystemsStore";
 import SignalComponentView from "./SignalComponentView.vue";
 import PathNodeComponentView from "./PathNodeComponentView.vue";
 import SegmentBoundaryNodeComponentView from "./SegmentBoundaryNodeComponentView.vue";
+import {useRailSystemsStore} from "../../../stores/railSystemsStore";
 
 export default {
   components: {
@@ -40,6 +40,10 @@ export default {
   },
   props: {
     component: {
+      type: Object,
+      required: true
+    },
+    railSystem: {
       type: Object,
       required: true
     }

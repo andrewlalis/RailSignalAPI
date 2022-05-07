@@ -2,7 +2,7 @@
   <h2>{{railSystem.name}}</h2>
   <div>
     <MapView :railSystem="railSystem" v-if="railSystem.segments && railSystem.components" />
-    <ComponentView v-if="railSystem.selectedComponent" :component="railSystem.selectedComponent"/>
+    <ComponentView v-if="railSystem.selectedComponent" :component="railSystem.selectedComponent" :railSystem="railSystem"/>
   </div>
   <SegmentsView />
   <AddSignal v-if="railSystem.segments && railSystem.segments.length > 0" />
