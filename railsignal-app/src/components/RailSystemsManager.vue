@@ -26,6 +26,12 @@ export default {
   name: "RailSystemsManager.vue",
   setup() {
     const rsStore = useRailSystemsStore();
+    rsStore.$subscribe(mutation => {
+      const evt = mutation.events;
+      if (evt.key === "selectedRailSystem" && evt.newValue !== null) {
+        rsStore.fetchSelectedRailSystemData();
+      }
+    });
     return {
       rsStore
     };

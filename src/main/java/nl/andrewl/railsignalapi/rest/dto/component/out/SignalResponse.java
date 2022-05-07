@@ -1,4 +1,4 @@
-package nl.andrewl.railsignalapi.rest.dto.component;
+package nl.andrewl.railsignalapi.rest.dto.component.out;
 
 import nl.andrewl.railsignalapi.model.component.Signal;
 import nl.andrewl.railsignalapi.rest.dto.SegmentResponse;

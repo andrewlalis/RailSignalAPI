@@ -4,10 +4,7 @@
   </header>
   <RailSystemsManager />
 
-  <RailSystem
-      v-if="rsStore.selectedRailSystem !== null"
-      :railSystem="rsStore.selectedRailSystem"
-  />
+  <RailSystem v-if="rsStore.selectedRailSystem !== null" :railSystem="rsStore.selectedRailSystem"/>
 </template>
 
 <script>

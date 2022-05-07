@@ -6,7 +6,7 @@ import nl.andrewl.railsignalapi.dao.RailSystemRepository;
 import nl.andrewl.railsignalapi.dao.SegmentRepository;
 import nl.andrewl.railsignalapi.model.Segment;
 import nl.andrewl.railsignalapi.model.component.Component;
-import nl.andrewl.railsignalapi.rest.SegmentPayload;
+import nl.andrewl.railsignalapi.rest.dto.SegmentPayload;
 import nl.andrewl.railsignalapi.rest.dto.FullSegmentResponse;
 import nl.andrewl.railsignalapi.rest.dto.SegmentResponse;
 import org.springframework.http.HttpStatus;
@@ -53,5 +53,6 @@ public class SegmentService {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 		componentRepository.deleteAll(segment.getSignals());
 		componentRepository.deleteAll(segment.getBoundaryNodes());
+		segmentRepository.delete(segment);
 	}
 }

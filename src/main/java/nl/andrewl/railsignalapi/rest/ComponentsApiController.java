@@ -2,8 +2,8 @@ package nl.andrewl.railsignalapi.rest;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
-import nl.andrewl.railsignalapi.rest.dto.component.ComponentResponse;
-import nl.andrewl.railsignalapi.rest.dto.component.SimpleComponentResponse;
+import nl.andrewl.railsignalapi.rest.dto.PathNodeUpdatePayload;
+import nl.andrewl.railsignalapi.rest.dto.component.out.ComponentResponse;
 import nl.andrewl.railsignalapi.service.ComponentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +17,7 @@ public class ComponentsApiController {
 	private final ComponentService componentService;
 
 	@GetMapping
-	public List<SimpleComponentResponse> getAllComponents(@PathVariable long rsId) {
+	public List<ComponentResponse> getAllComponents(@PathVariable long rsId) {
 		return componentService.getComponents(rsId);
 	}
 
@@ -35,5 +35,10 @@ public class ComponentsApiController {
 	public ResponseEntity<Void> removeComponent(@PathVariable long rsId, @PathVariable long cId) {
 		componentService.removeComponent(rsId, cId);
 		return ResponseEntity.noContent().build();
+	}
+
+	@PatchMapping(path = "/{cId}/connectedNodes")
+	public ComponentResponse updateConnectedNodes(@PathVariable long rsId, @PathVariable long cId, @RequestBody PathNodeUpdatePayload payload) {
+		return componentService.updatePath(rsId, cId, payload);
 	}
 }

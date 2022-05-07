@@ -11,8 +11,8 @@ import nl.andrewl.railsignalapi.dao.SwitchConfigurationRepository;
 import nl.andrewl.railsignalapi.model.RailSystem;
 import nl.andrewl.railsignalapi.model.Segment;
 import nl.andrewl.railsignalapi.model.component.*;
-import nl.andrewl.railsignalapi.rest.dto.component.ComponentResponse;
-import nl.andrewl.railsignalapi.rest.dto.component.SimpleComponentResponse;
+import nl.andrewl.railsignalapi.rest.dto.PathNodeUpdatePayload;
+import nl.andrewl.railsignalapi.rest.dto.component.out.ComponentResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,10 +31,10 @@ public class ComponentService {
 	private final SwitchConfigurationRepository switchConfigurationRepository;
 
 	@Transactional(readOnly = true)
-	public List<SimpleComponentResponse> getComponents(long rsId) {
+	public List<ComponentResponse> getComponents(long rsId) {
 		var rs = railSystemRepository.findById(rsId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-		return componentRepository.findAllByRailSystem(rs).stream().map(SimpleComponentResponse::new).toList();
+		return componentRepository.findAllByRailSystem(rs).stream().map(ComponentResponse::of).toList();
 	}
 
 	@Transactional(readOnly = true)
@@ -123,7 +123,22 @@ public class ComponentService {
 	}
 
 	@Transactional
-	public void remove(long rsId, long componentId) {
-
+	public ComponentResponse updatePath(long rsId, long cId, PathNodeUpdatePayload payload) {
+		var c = componentRepository.findByIdAndRailSystemId(cId, rsId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		if (!(c instanceof PathNode p)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Component is not a PathNode.");
+		Set<PathNode> newNodes = new HashSet<>();
+		for (var id : payload.connectedNodeIds()) {
+			var c1 = componentRepository.findByIdAndRailSystemId(id, rsId);
+			if (c1.isPresent() && c1.get() instanceof PathNode pn) {
+				newNodes.add(pn);
+			} else {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Component with id " + id + " is not a PathNode in the same rail system.");
+			}
+		}
+		p.getConnectedNodes().retainAll(newNodes);
+		p.getConnectedNodes().addAll(newNodes);
+		p = componentRepository.save(p);
+		return ComponentResponse.of(p);
 	}
 }

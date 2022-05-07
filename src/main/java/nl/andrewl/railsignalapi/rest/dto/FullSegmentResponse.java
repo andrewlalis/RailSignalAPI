@@ -1,8 +1,8 @@
 package nl.andrewl.railsignalapi.rest.dto;
 
 import nl.andrewl.railsignalapi.model.Segment;
-import nl.andrewl.railsignalapi.rest.dto.component.SegmentBoundaryNodeResponse;
-import nl.andrewl.railsignalapi.rest.dto.component.SignalResponse;
+import nl.andrewl.railsignalapi.rest.dto.component.out.SegmentBoundaryNodeResponse;
+import nl.andrewl.railsignalapi.rest.dto.component.out.SignalResponse;
 
 import java.util.List;
 
