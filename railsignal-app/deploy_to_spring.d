@@ -8,7 +8,7 @@ const DEST = "../src/main/resources/static";
 
 void main() {
     print("Deploying Vue app to Spring's /static directory.");
-    runOrQuit("npm run build");
+    runOrQuit("vite build --base=/app/");
     rmdirRecurse(DEST);
     copyDir("./dist", DEST);
 }

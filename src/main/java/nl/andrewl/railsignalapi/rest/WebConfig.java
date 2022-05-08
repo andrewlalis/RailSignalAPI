@@ -11,8 +11,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		registry.addResourceHandler("/**")
-				.addResourceLocations("classpath:/static/");
+		// Configure resource handlers to use the /app directory for all vue frontend stuff.
+		registry.addResourceHandler("/app/**")
+				.addResourceLocations("classpath:/app/");
 	}
 
 	@Override

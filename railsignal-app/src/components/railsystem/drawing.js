@@ -35,7 +35,7 @@ export function drawComponent(ctx, worldTx, component) {
     }
 }
 
-function drawSignal(ctx, signal) {
+function drawSignal(ctx) {
     roundedRect(ctx, -0.3, -0.5, 0.6, 1, 0.25);
     ctx.fillStyle = "black";
     ctx.fill();
@@ -44,7 +44,7 @@ function drawSignal(ctx, signal) {
     ctx.fill();
 }
 
-function drawSegmentBoundary(ctx, segmentBoundary) {
+function drawSegmentBoundary(ctx) {
     ctx.fillStyle = `rgb(150, 58, 224)`;
     ctx.beginPath();
     ctx.moveTo(0, -0.5);
