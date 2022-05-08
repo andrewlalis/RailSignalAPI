@@ -26,9 +26,10 @@ export const useRailSystemsStore = defineStore('RailSystemsStore', {
         createRailSystem(name) {
             return new Promise((resolve, reject) => {
                 axios.post(this.apiUrl + "/rs", {name: name})
-                    .then(() => {
+                    .then(response => {
+                        const newId = response.data.id;
                         this.refreshRailSystems()
-                            .then(() => resolve())
+                            .then(() => resolve(this.railSystems.find(rs => rs.id === newId)))
                             .catch(error => reject(error));
                     })
                     .catch(error => reject(error));
@@ -71,9 +72,15 @@ export const useRailSystemsStore = defineStore('RailSystemsStore', {
         },
         addSegment(name) {
             const rs = this.selectedRailSystem;
-            axios.post(`${this.apiUrl}/rs/${rs.id}/s`, {name: name})
-                .then(() => this.refreshSegments(rs))
-                .catch(error => console.log(error));
+            return new Promise((resolve, reject) => {
+                axios.post(`${this.apiUrl}/rs/${rs.id}/s`, {name: name})
+                    .then(() => {
+                        this.refreshSegments(rs)
+                            .then(() => resolve())
+                            .catch(error => reject(error));
+                    })
+                    .catch(error => reject(error));
+            });
         },
         removeSegment(id) {
             const rs = this.selectedRailSystem;
@@ -83,9 +90,15 @@ export const useRailSystemsStore = defineStore('RailSystemsStore', {
         },
         addComponent(data) {
             const rs = this.selectedRailSystem;
-            axios.post(`${this.apiUrl}/rs/${rs.id}/c`, data)
-                .then(() => this.refreshAllComponents(rs))
-                .catch(error => console.log(error));
+            return new Promise((resolve, reject) => {
+                axios.post(`${this.apiUrl}/rs/${rs.id}/c`, data)
+                    .then(() => {
+                        this.refreshAllComponents(rs)
+                            .then(() => resolve())
+                            .catch(error => reject(error));
+                    })
+                    .catch(error => reject(error));
+            });
         },
         removeComponent(id) {
             const rs = this.selectedRailSystem;

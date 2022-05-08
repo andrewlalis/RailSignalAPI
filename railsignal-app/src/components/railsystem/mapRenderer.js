@@ -9,6 +9,7 @@ const SCALE_VALUES = [0.01, 0.1, 0.25, 0.5, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0, 6.0, 
 const SCALE_INDEX_NORMAL = 7;
 const HOVER_RADIUS = 10;
 
+let mapContainerDiv = null;
 let mapCanvas = null;
 let railSystem = null;
 
@@ -24,6 +25,7 @@ export function initMap(rs) {
     console.log("Initializing map for rail system: " + rs.name);
     hoveredElements.length = 0;
     mapCanvas = document.getElementById("railSystemMapCanvas");
+    mapContainerDiv = document.getElementById("railSystemMapCanvasContainer");
     mapCanvas.removeEventListener("wheel", onMouseWheel);
     mapCanvas.addEventListener("wheel", onMouseWheel);
     mapCanvas.removeEventListener("mousedown", onMouseDown);
@@ -43,6 +45,12 @@ export function draw() {
         return;
     }
     const ctx = mapCanvas.getContext("2d");
+    if (mapCanvas.width !== mapContainerDiv.clientWidth) {
+        mapCanvas.width = mapContainerDiv.clientWidth;
+    }
+    if (mapCanvas.height !== mapContainerDiv.clientHeight) {
+        mapCanvas.height = mapContainerDiv.clientHeight;
+    }
     const width = mapCanvas.width;
     const height = mapCanvas.height;
     ctx.resetTransform();
@@ -50,6 +58,44 @@ export function draw() {
     ctx.fillRect(0, 0, width, height);
     const worldTx = getWorldTransform();
     ctx.setTransform(worldTx);
+
+    // Draw segments!
+    const segmentPoints = new Map();
+    railSystem.segments.forEach(segment => segmentPoints.set(segment.id, []));
+    for (let i = 0; i < railSystem.components.length; i++) {
+        const c = railSystem.components[i];
+        if (c.type === "SEGMENT_BOUNDARY") {
+            for (let j = 0; j < c.segments.length; j++) {
+                segmentPoints.get(c.segments[j].id).push({x: c.position.x, y: c.position.z});
+            }
+        }
+    }
+    railSystem.segments.forEach(segment => {
+        const points = segmentPoints.get(segment.id);
+        const avgPoint = {x: 0, y: 0};
+        points.forEach(point => {
+            avgPoint.x += point.x;
+            avgPoint.y += point.y;
+        });
+        avgPoint.x /= points.length;
+        avgPoint.y /= points.length;
+        let r = 5;
+        points.forEach(point => {
+            const dist2 = Math.pow(avgPoint.x - point.x, 2) + Math.pow(avgPoint.y - point.y, 2);
+            if (dist2 > r * r) {
+                r = Math.sqrt(dist2);
+            }
+        });
+        ctx.fillStyle = `rgba(200, 200, 200, 0.25)`;
+        const p = worldPointToMap(new DOMPoint(avgPoint.x, avgPoint.y, 0, 0));
+        const s = getScaleFactor();
+        ctx.beginPath();
+        ctx.arc(p.x / s, p.y / s, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+        ctx.font = "3px Sans-Serif";
+        ctx.fillText(`${segment.name}`, p.x / s, p.y / s);
+    });
 
     for (let i = 0; i < railSystem.components.length; i++) {
         const c = railSystem.components[i];

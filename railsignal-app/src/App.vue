@@ -1,21 +1,17 @@
 <template>
-  <header>
-    <h1>RailSignal</h1>
-  </header>
-  <RailSystemsManager />
-
+  <AppNavbar />
   <RailSystem v-if="rsStore.selectedRailSystem !== null" :railSystem="rsStore.selectedRailSystem"/>
 </template>
 
 <script>
-import RailSystem from "./components/RailSystem.vue";
-import RailSystemsManager from "./components/RailSystemsManager.vue";
 import {useRailSystemsStore} from "./stores/railSystemsStore";
+import AppNavbar from "./components/AppNavbar.vue";
+import RailSystem from "./components/RailSystem.vue";
 
 export default {
   components: {
-    RailSystem,
-    RailSystemsManager
+    AppNavbar,
+    RailSystem
   },
   setup() {
     const rsStore = useRailSystemsStore();

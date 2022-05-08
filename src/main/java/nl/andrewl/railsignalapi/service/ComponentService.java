@@ -65,8 +65,11 @@ public class ComponentService {
 		pos.setY(data.get("position").get("y").asDouble());
 		pos.setZ(data.get("position").get("z").asDouble());
 		String name = data.get("name").asText();
+		if (name == null || name.isBlank()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing required name.");
+		}
 
-		if (name != null && componentRepository.existsByNameAndRailSystem(name, rs)) {
+		if (componentRepository.existsByNameAndRailSystem(name, rs)) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Component with that name already exists.");
 		}
 
@@ -103,6 +106,9 @@ public class ComponentService {
 				}
 			}
 			s.getPossibleConfigurations().add(new SwitchConfiguration(s, pathNodes));
+		}
+		if (s.getPossibleConfigurations().size() < 2) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least two switch configurations are needed.");
 		}
 		return s;
 	}

@@ -1,10 +1,17 @@
 <template>
-  <h5>Segments</h5>
-  <ul>
-    <li v-for="segment in node.segments" :key="segment.id">
-      {{segment.id}} | {{segment.name}}
-    </li>
-  </ul>
+  <h5>Segments Connected</h5>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="segment in node.segments" :key="segment.id">
+        <td>{{segment.name}}</td>
+      </tr>
+    </tbody>
+  </table>
 </template>
 
 <script>

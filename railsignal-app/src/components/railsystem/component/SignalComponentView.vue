@@ -1,7 +1,13 @@
 <template>
-  <p>
-    Connected segment: {{signal.segment.id}} {{signal.segment.name}}
-  </p>
+  <h5>Signal Properties</h5>
+  <table class="table">
+    <tbody>
+      <tr>
+        <th>Connected to</th>
+        <td>{{signal.segment.name}}</td>
+      </tr>
+    </tbody>
+  </table>
 </template>
 
 <script>

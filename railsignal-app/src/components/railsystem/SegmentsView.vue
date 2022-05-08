@@ -1,22 +1,22 @@
 <template>
-  <h3>Segments</h3>
-  <ul>
-    <li v-for="segment in rsStore.selectedRailSystem.segments" :key="segment.id">
-      {{segment.name}} <button @click.prevent="rsStore.removeSegment(segment.id)">Remove</button>
+  <h5>Segments</h5>
+  <ul class="list-group overflow-auto mb-2" style="max-height: 200px;">
+    <li
+        v-for="segment in rsStore.selectedRailSystem.segments"
+        :key="segment.id"
+        class="list-group-item"
+    >
+      {{segment.name}}
+      <button @click.prevent="rsStore.removeSegment(segment.id)" class="btn btn-sm btn-danger float-end">Remove</button>
     </li>
   </ul>
-  <AddSegment />
 </template>
 
 <script>
-import AddSegment from "./AddSegment.vue";
 import {useRailSystemsStore} from "../../stores/railSystemsStore";
 
 export default {
   name: "SegmentsView.vue",
-  components: {
-    AddSegment
-  },
   setup() {
     const rsStore = useRailSystemsStore();
     return {

@@ -1,22 +1,39 @@
 <template>
   <h5>Connected Nodes</h5>
-  <ul v-if="pathNode.connectedNodes.length > 0">
-    <li v-for="node in pathNode.connectedNodes" :key="node.id">
-      {{node.id}} | {{node.name}}
-      <button @click="rsStore.removeConnection(pathNode, node)">Remove</button>
-    </li>
-  </ul>
+  <table class="table" v-if="pathNode.connectedNodes.length > 0">
+    <thead>
+      <tr>
+        <th>Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="node in pathNode.connectedNodes" :key="node.id">
+        <td>{{node.name}}</td>
+        <td>
+          <button
+              @click="rsStore.removeConnection(pathNode, node)"
+              class="btn btn-sm btn-danger"
+          >
+            Remove
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
   <p v-if="pathNode.connectedNodes.length === 0">
     There are no connected nodes.
   </p>
-  <form @submit.prevent="rsStore.addConnection(pathNode, formData.nodeToAdd)">
-    <label for="pathNodeAddConnection">Add Connection</label>
-    <select id="pathNodeAddConnection" v-model="formData.nodeToAdd">
+  <form
+      @submit.prevent="rsStore.addConnection(pathNode, formData.nodeToAdd)"
+      v-if="getEligibleConnections().length > 0"
+      class="input-group mb-3"
+  >
+    <select v-model="formData.nodeToAdd" class="form-select form-select-sm">
       <option v-for="node in this.getEligibleConnections()" :key="node.id" :value="node">
-        {{node.id}} | {{node.name}} | {{node.type}}
+        {{node.name}}
       </option>
     </select>
-    <button type="submit">Add</button>
+    <button type="submit" class="btn btn-sm btn-success">Add Connection</button>
   </form>
 </template>
 

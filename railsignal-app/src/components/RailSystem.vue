@@ -1,26 +1,25 @@
 <template>
-  <h2>{{railSystem.name}}</h2>
-  <div>
-    <MapView :railSystem="railSystem" v-if="railSystem.segments && railSystem.components" />
-    <ComponentView v-if="railSystem.selectedComponent" :component="railSystem.selectedComponent" :railSystem="railSystem"/>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-8 p-0">
+        <MapView :railSystem="railSystem" v-if="railSystem.segments && railSystem.components" />
+      </div>
+      <div class="col-md-4">
+        <ComponentView v-if="railSystem.selectedComponent" :component="railSystem.selectedComponent" :railSystem="railSystem"/>
+        <RailSystemPropertiesView v-if="!railSystem.selectedComponent" :railSystem="railSystem"/>
+      </div>
+    </div>
   </div>
-  <SegmentsView />
-  <AddSignal v-if="railSystem.segments && railSystem.segments.length > 0" />
-  <AddSegmentBoundary v-if="railSystem.segments && railSystem.segments.length > 0" />
 </template>
 
 <script>
 import MapView from './railsystem/MapView.vue'
 import ComponentView from './railsystem/component/ComponentView.vue'
-import SegmentsView from "./railsystem/SegmentsView.vue";
-import AddSignal from "./railsystem/component/AddSignal.vue";
-import AddSegmentBoundary from "./railsystem/component/AddSegmentBoundary.vue";
+import RailSystemPropertiesView from "./railsystem/RailSystemPropertiesView.vue";
 
 export default {
   components: {
-    AddSignal,
-    AddSegmentBoundary,
-    SegmentsView,
+    RailSystemPropertiesView,
     MapView,
     ComponentView
   },

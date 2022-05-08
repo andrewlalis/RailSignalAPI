@@ -1,5 +1,5 @@
 <script>
-import {initMap} from "./mapRenderer.js";
+import {initMap, draw} from "./mapRenderer.js";
 
 export default {
   props: {
@@ -15,18 +15,33 @@ export default {
   updated() {
     // Also, re-initialize any time this view is updated.
     initMap(this.railSystem);
+  },
+  watch: {
+    railSystem: {
+      handler() {
+        draw();
+      },
+      deep: true
+    }
   }
 }
 </script>
 
 <template>
-  <canvas id="railSystemMapCanvas" width="1000" height="600">
+  <div class="canvas-container" id="railSystemMapCanvasContainer">
+    <canvas id="railSystemMapCanvas">
       Your browser doesn't support canvas!
-  </canvas>
+    </canvas>
+  </div>
 </template>
 
 <style>
+.canvas-container {
+  width: 100%;
+  height: 800px;
+}
 canvas {
-  border: 1px solid black;
+  width: 100%;
+  height: 100%;
 }
 </style>

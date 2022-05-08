@@ -35,9 +35,10 @@ public abstract class Component {
 	private Position position;
 
 	/**
-	 * A human-readable name for the component.
+	 * A human-readable name for the component. This must be unique among all
+	 * components in the rail system.
 	 */
-	@Column
+	@Column(nullable = false)
 	private String name;
 
 	/**
