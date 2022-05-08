@@ -11,6 +11,6 @@ public class SwitchResponse extends PathNodeResponse {
 	public SwitchResponse(Switch s) {
 		super(s);
 		this.possibleConfigurations = s.getPossibleConfigurations().stream().map(SwitchConfigurationResponse::new).toList();
-		this.activeConfiguration = new SwitchConfigurationResponse(s.getActiveConfiguration());
+		this.activeConfiguration = s.getActiveConfiguration() == null ? null : new SwitchConfigurationResponse(s.getActiveConfiguration());
 	}
 }
