@@ -1,5 +1,8 @@
 package nl.andrewl.railsignalapi.model;
 
+/**
+ * A cardinal direction, useful for some components.
+ */
 public enum Direction {
 	NORTH,
 	SOUTH,

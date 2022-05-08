@@ -3,7 +3,6 @@ package nl.andrewl.railsignalapi.websocket;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nl.andrewl.railsignalapi.service.SignalService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -18,7 +17,6 @@ import java.util.Set;
 @Slf4j
 public class SignalWebSocketHandler extends TextWebSocketHandler {
 	private final ObjectMapper mapper = new ObjectMapper();
-	private final SignalService signalService;
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -31,19 +29,19 @@ public class SignalWebSocketHandler extends TextWebSocketHandler {
 		for (var idStr : signalIdHeader.split(",")) {
 			ids.add(Long.parseLong(idStr.trim()));
 		}
-		signalService.registerSignalWebSocketSession(ids, session);
+		//signalService.registerSignalWebSocketSession(ids, session);
 		log.info("Connection established with signals {}.", ids);
 	}
 
 	@Override
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 		var msg = mapper.readValue(message.getPayload(), SignalUpdateMessage.class);
-		signalService.handleSignalUpdate(msg);
+		//signalService.handleSignalUpdate(msg);
 	}
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-		signalService.deregisterSignalWebSocketSession(session);
+		//signalService.deregisterSignalWebSocketSession(session);
 		log.info("Closed connection {}. Status: {}", session.getId(), status.toString());
 	}
 }

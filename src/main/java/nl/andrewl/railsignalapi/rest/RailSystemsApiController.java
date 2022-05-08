@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/api/railSystems")
+@RequestMapping(path = "/api/rs")
 @RequiredArgsConstructor
 public class RailSystemsApiController {
 	private final RailSystemService railSystemService;

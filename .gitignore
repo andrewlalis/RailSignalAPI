@@ -34,3 +34,6 @@ build/
 
 *.mv.db
 *.trace.db
+
+src/main/resources/app
+/build_system

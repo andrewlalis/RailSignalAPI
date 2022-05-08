@@ -1,9 +1,9 @@
 package nl.andrewl.railsignalapi.service;
 
 import lombok.RequiredArgsConstructor;
-import nl.andrewl.railsignalapi.dao.BranchRepository;
+import nl.andrewl.railsignalapi.dao.ComponentRepository;
 import nl.andrewl.railsignalapi.dao.RailSystemRepository;
-import nl.andrewl.railsignalapi.dao.SignalRepository;
+import nl.andrewl.railsignalapi.dao.SegmentRepository;
 import nl.andrewl.railsignalapi.model.RailSystem;
 import nl.andrewl.railsignalapi.rest.dto.RailSystemCreationPayload;
 import nl.andrewl.railsignalapi.rest.dto.RailSystemResponse;
@@ -19,8 +19,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RailSystemService {
 	private final RailSystemRepository railSystemRepository;
-	private final SignalRepository signalRepository;
-	private final BranchRepository branchRepository;
+	private final SegmentRepository segmentRepository;
+	private final ComponentRepository<?> componentRepository;
 
 	@Transactional
 	public List<RailSystemResponse> getRailSystems() {
@@ -29,10 +29,13 @@ public class RailSystemService {
 
 	@Transactional
 	public RailSystemResponse createRailSystem(RailSystemCreationPayload payload) {
-		if (railSystemRepository.existsByName(payload.name())) {
+		if (payload.name() == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing required name.");
+		if (payload.name().isBlank()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Name cannot be blank.");
+		String name = payload.name().trim();
+		if (railSystemRepository.existsByName(name)) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A rail system with that name already exists.");
 		}
-		RailSystem rs = new RailSystem(payload.name());
+		RailSystem rs = new RailSystem(name);
 		return new RailSystemResponse(railSystemRepository.save(rs));
 	}
 
@@ -40,10 +43,8 @@ public class RailSystemService {
 	public void delete(long rsId) {
 		var rs = railSystemRepository.findById(rsId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-		var signals = signalRepository.findAllByRailSystemOrderByName(rs);
-		signalRepository.deleteAll(signals);
-		var branches = branchRepository.findAllByRailSystemOrderByName(rs);
-		branchRepository.deleteAll(branches);
+		componentRepository.deleteAllByRailSystem(rs);
+		segmentRepository.deleteAllByRailSystem(rs);
 		railSystemRepository.delete(rs);
 	}
 
