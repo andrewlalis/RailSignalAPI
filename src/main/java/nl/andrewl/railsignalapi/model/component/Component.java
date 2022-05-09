@@ -9,9 +9,9 @@ import nl.andrewl.railsignalapi.model.RailSystem;
 import javax.persistence.*;
 
 /**
- * Represents a physical component of the rail system that the API can interact
- * with, and send or receive data from. For example, a signal, switch, or
- * detector.
+ * Represents component of the rail system that exists in the system's world,
+ * at a specific location. Any component that exists in the rail system extends
+ * from this parent entity.
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -51,9 +51,9 @@ public abstract class Component {
 	 * Whether this component is online, meaning that an in-world device is
 	 * currently connected to relay information regarding this component.
 	 */
-	@Column(nullable = false)
+	@Column
 	@Setter
-	private boolean online = false;
+	private Boolean online = null;
 
 	public Component(RailSystem railSystem, Position position, String name, ComponentType type) {
 		this.railSystem = railSystem;
@@ -65,7 +65,8 @@ public abstract class Component {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		return o instanceof Component c && this.id != null && this.id.equals(c.id);
+		if (!(o instanceof Component c)) return false;
+		return (this.id != null && this.id.equals(c.id)) || this.name.equals(c.name);
 	}
 
 	@Override

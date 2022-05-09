@@ -8,7 +8,7 @@ public record SimpleComponentResponse (
 		Position position,
 		String name,
 		String type,
-		boolean online
+		Boolean online
 ) {
 	public SimpleComponentResponse(Component c) {
 		this(
@@ -16,7 +16,7 @@ public record SimpleComponentResponse (
 				c.getPosition(),
 				c.getName(),
 				c.getType().name(),
-				c.isOnline()
+				c.getOnline()
 		);
 	}
 }

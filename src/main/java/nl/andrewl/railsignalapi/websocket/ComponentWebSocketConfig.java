@@ -9,11 +9,13 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @Configuration
 @EnableWebSocket
 @RequiredArgsConstructor
-public class WebSocketConfig implements WebSocketConfigurer {
+public class ComponentWebSocketConfig implements WebSocketConfigurer {
 	private final SignalWebSocketHandler webSocketHandler;
+	private final ComponentWebSocketHandshakeInterceptor handshakeInterceptor;
 
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-		registry.addHandler(webSocketHandler, "/api/ws-signal");
+		registry.addHandler(webSocketHandler, "/api/ws/component")
+				.addInterceptors(handshakeInterceptor);
 	}
 }

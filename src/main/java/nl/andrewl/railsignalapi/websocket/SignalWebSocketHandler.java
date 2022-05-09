@@ -35,7 +35,7 @@ public class SignalWebSocketHandler extends TextWebSocketHandler {
 
 	@Override
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-		var msg = mapper.readValue(message.getPayload(), SignalUpdateMessage.class);
+//		var msg = mapper.readValue(message.getPayload(), SignalUpdateMessage.class);
 		//signalService.handleSignalUpdate(msg);
 	}
 

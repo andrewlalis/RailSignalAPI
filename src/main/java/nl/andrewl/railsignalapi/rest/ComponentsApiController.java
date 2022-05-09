@@ -1,13 +1,15 @@
 package nl.andrewl.railsignalapi.rest;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import nl.andrewl.railsignalapi.rest.dto.PathNodeUpdatePayload;
+import nl.andrewl.railsignalapi.rest.dto.component.in.ComponentPayload;
 import nl.andrewl.railsignalapi.rest.dto.component.out.ComponentResponse;
+import nl.andrewl.railsignalapi.service.ComponentCreationService;
 import nl.andrewl.railsignalapi.service.ComponentService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -15,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ComponentsApiController {
 	private final ComponentService componentService;
+	private final ComponentCreationService componentCreationService;
 
 	@GetMapping
 	public List<ComponentResponse> getAllComponents(@PathVariable long rsId) {
@@ -27,8 +30,8 @@ public class ComponentsApiController {
 	}
 
 	@PostMapping
-	public ComponentResponse createComponent(@PathVariable long rsId, @RequestBody ObjectNode data) {
-		return componentService.create(rsId, data);
+	public ComponentResponse createComponent(@PathVariable long rsId, @RequestBody ComponentPayload payload) {
+		return componentCreationService.create(rsId, payload);
 	}
 
 	@DeleteMapping(path = "/{cId}")

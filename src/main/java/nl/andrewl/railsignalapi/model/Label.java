@@ -3,6 +3,9 @@ package nl.andrewl.railsignalapi.model;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import nl.andrewl.railsignalapi.model.component.Component;
+import nl.andrewl.railsignalapi.model.component.ComponentType;
+import nl.andrewl.railsignalapi.model.component.Position;
 
 import javax.persistence.*;
 
@@ -13,19 +16,12 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Label {
-	@Id
-	@GeneratedValue
-	private Long id;
-
-	@ManyToOne(optional = false, fetch = FetchType.LAZY)
-	private RailSystem railSystem;
-
-	@Column(nullable = false, length = 63)
+public class Label extends Component {
+	@Column(nullable = false)
 	private String text;
 
-	public Label(RailSystem rs, String text) {
-		this.railSystem = rs;
+	public Label(RailSystem rs, Position position, String name, String text) {
+		super(rs, position, name, ComponentType.LABEL);
 		this.text = text;
 	}
 }
