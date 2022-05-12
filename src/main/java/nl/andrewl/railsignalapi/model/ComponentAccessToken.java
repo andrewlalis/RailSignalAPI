@@ -18,6 +18,8 @@ import java.util.Set;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class ComponentAccessToken {
+	public static final byte PREFIX_SIZE = 7;
+
 	@Id
 	@GeneratedValue
 	private Long id;
@@ -37,7 +39,7 @@ public class ComponentAccessToken {
 	/**
 	 * A short prefix of the token, which is useful for speeding up lookup.
 	 */
-	@Column(nullable = false, length = 7)
+	@Column(nullable = false, length = PREFIX_SIZE)
 	private String tokenPrefix;
 
 	/**

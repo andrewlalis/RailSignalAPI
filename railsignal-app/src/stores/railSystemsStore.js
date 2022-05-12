@@ -5,10 +5,17 @@ export const useRailSystemsStore = defineStore('RailSystemsStore', {
     state: () => ({
         railSystems: [],
         /**
-         * @type {{segments: [Object], components: [Object], selectedComponent: Object} | null}
+         * @type {{
+         * segments: [Object],
+         * components: [Object],
+         * selectedComponent: Object | null,
+         * websocket: WebSocket | null
+         * } | null}
          */
         selectedRailSystem: null,
-        apiUrl: import.meta.env.VITE_API_URL
+        websocket: null,
+        apiUrl: import.meta.env.VITE_API_URL,
+        wsUrl: import.meta.env.VITE_WS_URL
     }),
     actions: {
         refreshRailSystems() {
@@ -65,10 +72,24 @@ export const useRailSystemsStore = defineStore('RailSystemsStore', {
                     });
             });
         },
-        fetchSelectedRailSystemData() {
+        onSelectedRailSystemChanged() {
             if (!this.selectedRailSystem) return;
             this.refreshSegments(this.selectedRailSystem);
             this.refreshAllComponents(this.selectedRailSystem);
+            if (this.websocket !== null) {
+                this.websocket.close();
+            }
+            console.log(this.wsUrl);
+            this.websocket = new WebSocket(this.wsUrl);
+            this.websocket.onopen = event => {
+                console.log("Opened websocket connection.");
+            };
+            this.websocket.onclose = event => {
+                console.log("Closed websocket connection.");
+            };
+            this.websocket.onmessage = () => {
+
+            };
         },
         addSegment(name) {
             const rs = this.selectedRailSystem;
