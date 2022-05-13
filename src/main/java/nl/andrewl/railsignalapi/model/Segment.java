@@ -3,6 +3,7 @@ package nl.andrewl.railsignalapi.model;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import nl.andrewl.railsignalapi.model.component.SegmentBoundaryNode;
 import nl.andrewl.railsignalapi.model.component.Signal;
 
@@ -30,6 +31,13 @@ public class Segment {
 	 */
 	@Column
 	private String name;
+
+	/**
+	 * Whether this segment is occupied by a train.
+	 */
+	@Column(nullable = false)
+	@Setter
+	private boolean occupied;
 
 	/**
 	 * The signals that are connected to this branch.

@@ -1,8 +1,10 @@
 package nl.andrewl.railsignalapi.live.tcp_socket;
 
 import lombok.extern.slf4j.Slf4j;
-import nl.andrewl.railsignalapi.dao.ComponentAccessTokenRepository;
-import nl.andrewl.railsignalapi.model.ComponentAccessToken;
+import nl.andrewl.railsignalapi.dao.LinkTokenRepository;
+import nl.andrewl.railsignalapi.live.ComponentDownlinkService;
+import nl.andrewl.railsignalapi.live.ComponentUplinkMessageHandler;
+import nl.andrewl.railsignalapi.model.LinkToken;
 import nl.andrewl.railsignalapi.util.JsonUtils;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.ContextClosedEvent;
@@ -16,23 +18,48 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A plain TCP server socket which can be used to connect to components that
- * don't have access to a full websocket client implementation.
+ * don't have access to a full websocket client implementation. Instead of the
+ * standard interceptor -> handler workflow for incoming connections, this
+ * server simply lets the component link send its token as an initial packet
+ * in the socket.
+ * <p>
+ *     All messages sent in this TCP socket are formatted as length-prefixed
+ *     JSON messages, where a 2-byte length is sent, followed by exactly that
+ *     many bytes, which can be parsed as a JSON object.
+ * </p>
+ * <p>
+ *     In response to the connection packet, the server will send a
+ *     {@link ConnectMessage} response.
+ * </p>
  */
 @Component
 @Slf4j
 public class TcpSocketServer {
 	private final ServerSocket serverSocket;
-	private final ComponentAccessTokenRepository tokenRepository;
-	private final PasswordEncoder passwordEncoder;
+	private final Set<TcpLinkManager> linkManagers;
 
-	public TcpSocketServer(ComponentAccessTokenRepository tokenRepository, PasswordEncoder passwordEncoder) throws IOException {
+	private final LinkTokenRepository tokenRepository;
+	private final PasswordEncoder passwordEncoder;
+	private final ComponentDownlinkService componentDownlinkService;
+	private final ComponentUplinkMessageHandler uplinkMessageHandler;
+
+	public TcpSocketServer(
+			LinkTokenRepository tokenRepository,
+			PasswordEncoder passwordEncoder,
+			ComponentDownlinkService componentDownlinkService,
+			ComponentUplinkMessageHandler uplinkMessageHandler
+	) throws IOException {
 		this.tokenRepository = tokenRepository;
 		this.passwordEncoder = passwordEncoder;
+		this.componentDownlinkService = componentDownlinkService;
+		this.uplinkMessageHandler = uplinkMessageHandler;
+
+		this.linkManagers = new HashSet<>();
 		this.serverSocket = new ServerSocket();
 		serverSocket.setReuseAddress(true);
 		serverSocket.bind(new InetSocketAddress("localhost", 8081));
@@ -47,33 +74,42 @@ public class TcpSocketServer {
 					Socket socket = serverSocket.accept();
 					initializeConnection(socket);
 				} catch (IOException e) {
-					log.warn("An IOException occurred while waiting to accept a TCP socket connection.", e);
+					if (!e.getMessage().contains("Socket closed")) {
+						log.warn("An IOException occurred while waiting to accept a TCP socket connection.", e);
+					}
 				}
 			}
-		});
+			log.info("TCP Socket has been shut down.");
+		}, "TcpSocketThread").start();
 	}
 
 	@EventListener(ContextClosedEvent.class)
 	public void closeServer() throws IOException {
 		serverSocket.close();
+		for (var linkManager : linkManagers) linkManager.shutdown();
 	}
 
 	private void initializeConnection(Socket socket) throws IOException {
 		DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 		DataInputStream in = new DataInputStream(socket.getInputStream());
-		int tokenLength = in.readInt();
+		short tokenLength = in.readShort();
 		String rawToken = new String(in.readNBytes(tokenLength));
-		if (rawToken.length() < ComponentAccessToken.PREFIX_SIZE) {
-			byte[] respBytes = JsonUtils.toJson(Map.of("message", "Invalid token")).getBytes(StandardCharsets.UTF_8);
-			out.writeInt(respBytes.length);
-			out.write(respBytes);
+		if (rawToken.length() < LinkToken.PREFIX_SIZE) {
+			JsonUtils.writeJsonString(out, new ConnectMessage(false, "Invalid or missing token."));
 			socket.close();
-		}
-		Iterable<ComponentAccessToken> tokens = tokenRepository.findAllByTokenPrefix(rawToken.substring(0, ComponentAccessToken.PREFIX_SIZE));
-		for (var token : tokens) {
-			if (passwordEncoder.matches(rawToken, token.getTokenHash())) {
-
+		} else {
+			Iterable<LinkToken> tokens = tokenRepository.findAllByTokenPrefix(rawToken.substring(0, LinkToken.PREFIX_SIZE));
+			for (var token : tokens) {
+				if (passwordEncoder.matches(rawToken, token.getTokenHash())) {
+					JsonUtils.writeJsonString(out, new ConnectMessage(true, "Connection established."));
+					var linkManager = new TcpLinkManager(token.getId(), socket, componentDownlinkService, uplinkMessageHandler);
+					new Thread(linkManager, "linkManager-" + token.getId()).start();
+					linkManagers.add(linkManager);
+					return;
+				}
 			}
+			JsonUtils.writeJsonString(out, new ConnectMessage(false, "Invalid token."));
+			socket.close();
 		}
 	}
 }

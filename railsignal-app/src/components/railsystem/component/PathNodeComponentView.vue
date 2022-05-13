@@ -1,40 +1,32 @@
 <template>
-  <h5>Connected Nodes</h5>
-  <table class="table" v-if="pathNode.connectedNodes.length > 0">
-    <thead>
-      <tr>
-        <th>Name</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="node in pathNode.connectedNodes" :key="node.id">
-        <td>{{node.name}}</td>
-        <td>
-          <button
-              @click="rsStore.removeConnection(pathNode, node)"
-              class="btn btn-sm btn-danger"
-          >
-            Remove
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <p v-if="pathNode.connectedNodes.length === 0">
-    There are no connected nodes.
-  </p>
-  <form
-      @submit.prevent="rsStore.addConnection(pathNode, formData.nodeToAdd)"
-      v-if="getEligibleConnections().length > 0"
-      class="input-group mb-3"
-  >
-    <select v-model="formData.nodeToAdd" class="form-select form-select-sm">
-      <option v-for="node in this.getEligibleConnections()" :key="node.id" :value="node">
+    <h5>Connected Nodes</h5>
+    <ul class="list-group list-group-flush mb-2 border" v-if="pathNode.connectedNodes.length > 0" style="overflow: auto; max-height: 150px;">
+      <li
+          v-for="node in pathNode.connectedNodes"
+          :key="node.id"
+          class="list-group-item"
+      >
         {{node.name}}
-      </option>
-    </select>
-    <button type="submit" class="btn btn-sm btn-success">Add Connection</button>
-  </form>
+        <button @click="rsStore.removeConnection(pathNode, node)" class="btn btn-sm btn-danger float-end">
+          Remove
+        </button>
+      </li>
+    </ul>
+    <p v-if="pathNode.connectedNodes.length === 0">
+      There are no connected nodes.
+    </p>
+    <form
+        @submit.prevent="rsStore.addConnection(pathNode, formData.nodeToAdd)"
+        v-if="getEligibleConnections().length > 0"
+        class="input-group mb-3"
+    >
+      <select v-model="formData.nodeToAdd" class="form-select form-select-sm">
+        <option v-for="node in this.getEligibleConnections()" :key="node.id" :value="node">
+          {{node.name}}
+        </option>
+      </select>
+      <button type="submit" class="btn btn-sm btn-success">Add Connection</button>
+    </form>
 </template>
 
 <script>

@@ -1,8 +1,9 @@
-package nl.andrewl.railsignalapi.model;
+package nl.andrewl.railsignalapi.model.component;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import nl.andrewl.railsignalapi.model.RailSystem;
 import nl.andrewl.railsignalapi.model.component.Component;
 import nl.andrewl.railsignalapi.model.component.ComponentType;
 import nl.andrewl.railsignalapi.model.component.Position;

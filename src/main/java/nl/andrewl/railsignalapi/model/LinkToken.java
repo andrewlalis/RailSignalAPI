@@ -17,7 +17,7 @@ import java.util.Set;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class ComponentAccessToken {
+public class LinkToken {
 	public static final byte PREFIX_SIZE = 7;
 
 	@Id
@@ -54,7 +54,7 @@ public class ComponentAccessToken {
 	@ManyToMany
 	private Set<Component> components;
 
-	public ComponentAccessToken(RailSystem railSystem, String label, String tokenPrefix, String tokenHash, Set<Component> components) {
+	public LinkToken(RailSystem railSystem, String label, String tokenPrefix, String tokenHash, Set<Component> components) {
 		this.railSystem = railSystem;
 		this.label = label;
 		this.tokenPrefix = tokenPrefix;

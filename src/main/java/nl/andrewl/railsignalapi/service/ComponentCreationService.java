@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import nl.andrewl.railsignalapi.dao.ComponentRepository;
 import nl.andrewl.railsignalapi.dao.RailSystemRepository;
 import nl.andrewl.railsignalapi.dao.SegmentRepository;
-import nl.andrewl.railsignalapi.model.Label;
+import nl.andrewl.railsignalapi.model.component.Label;
 import nl.andrewl.railsignalapi.model.RailSystem;
 import nl.andrewl.railsignalapi.model.Segment;
 import nl.andrewl.railsignalapi.model.component.*;
@@ -66,6 +66,7 @@ public class ComponentCreationService {
 
 	private Component createSwitch(RailSystem rs, SwitchPayload payload) {
 		Switch s = new Switch(rs, payload.position, payload.name, new HashSet<>(), new HashSet<>(), null);
+		s = componentRepository.save(s);
 		for (var config : payload.possibleConfigurations) {
 			Set<PathNode> pathNodes = new HashSet<>();
 			for (var node : config.nodes) {
@@ -74,6 +75,8 @@ public class ComponentCreationService {
 				if (c instanceof PathNode pathNode) {
 					pathNodes.add(pathNode);
 					s.getConnectedNodes().add(pathNode);
+					pathNode.getConnectedNodes().add(s);
+					componentRepository.save(pathNode);
 				} else {
 					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id " + node.id + " does not refer to a PathNode component.");
 				}

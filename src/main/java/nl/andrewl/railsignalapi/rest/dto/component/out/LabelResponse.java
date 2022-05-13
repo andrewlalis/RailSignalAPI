@@ -1,6 +1,6 @@
 package nl.andrewl.railsignalapi.rest.dto.component.out;
 
-import nl.andrewl.railsignalapi.model.Label;
+import nl.andrewl.railsignalapi.model.component.Label;
 
 public class LabelResponse extends ComponentResponse {
 	public String text;

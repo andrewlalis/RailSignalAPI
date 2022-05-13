@@ -20,7 +20,8 @@ import java.util.Set;
 public class SegmentBoundaryNode extends PathNode {
 	/**
 	 * The set of segments that this boundary node connects. This should
-	 * generally always have exactly two segments.
+	 * generally always have exactly two segments. It can never have more than
+	 * two segments.
 	 */
 	@ManyToMany
 	private Set<Segment> segments;

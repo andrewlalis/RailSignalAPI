@@ -2,17 +2,16 @@ package nl.andrewl.railsignalapi.live.websocket;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nl.andrewl.railsignalapi.dao.ComponentAccessTokenRepository;
 import nl.andrewl.railsignalapi.live.ComponentDownlinkService;
+import nl.andrewl.railsignalapi.live.ComponentUplinkMessageHandler;
+import nl.andrewl.railsignalapi.live.dto.ComponentUplinkMessage;
+import nl.andrewl.railsignalapi.util.JsonUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Handler for websocket connections that components open to send and receive
@@ -22,24 +21,20 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class ComponentWebsocketHandler extends TextWebSocketHandler {
-	private final ComponentAccessTokenRepository tokenRepository;
 	private final ComponentDownlinkService componentDownlinkService;
+	private final ComponentUplinkMessageHandler uplinkMessageHandler;
 
 	@Override
 	@Transactional(readOnly = true)
-	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+	public void afterConnectionEstablished(WebSocketSession session) {
 		long tokenId = (long) session.getAttributes().get("tokenId");
-		var token = tokenRepository.findById(tokenId).orElseThrow();
-		Set<Long> componentIds = token.getComponents().stream()
-				.map(nl.andrewl.railsignalapi.model.component.Component::getId)
-				.collect(Collectors.toSet());
-		componentDownlinkService.registerDownlink(new WebsocketDownlink(tokenId, session), componentIds);
+		componentDownlinkService.registerDownlink(new WebsocketDownlink(tokenId, session));
 	}
 
 	@Override
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-//		var msg = mapper.readValue(message.getPayload(), SignalUpdateMessage.class);
-		//signalService.handleSignalUpdate(msg);
+		var msg = JsonUtils.readMessage(message.getPayload(), ComponentUplinkMessage.class);
+		uplinkMessageHandler.messageReceived(msg);
 	}
 
 	@Override

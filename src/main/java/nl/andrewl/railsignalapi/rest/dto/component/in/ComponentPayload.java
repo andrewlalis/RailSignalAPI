@@ -3,7 +3,7 @@ package nl.andrewl.railsignalapi.rest.dto.component.in;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import nl.andrewl.railsignalapi.model.Label;
+import nl.andrewl.railsignalapi.model.component.Label;
 import nl.andrewl.railsignalapi.model.component.Position;
 
 import javax.validation.constraints.NotBlank;

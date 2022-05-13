@@ -23,7 +23,7 @@ public class AppWebsocketHandshakeInterceptor implements HandshakeInterceptor {
 	@Override
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) {
 		String path = request.getURI().getPath();
-		Long railSystemId = Long.parseLong(path.substring(path.lastIndexOf('/')));
+		Long railSystemId = Long.parseLong(path.substring(path.lastIndexOf('/') + 1));
 		if (!railSystemRepository.existsById(railSystemId)) {
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			return false;

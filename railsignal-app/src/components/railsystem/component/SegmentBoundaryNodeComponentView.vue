@@ -4,11 +4,13 @@
     <thead>
       <tr>
         <th>Name</th>
+        <th>Occupied</th>
       </tr>
     </thead>
     <tbody>
       <tr v-for="segment in node.segments" :key="segment.id">
         <td>{{segment.name}}</td>
+        <td>{{segment.occupied}}</td>
       </tr>
     </tbody>
   </table>

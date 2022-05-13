@@ -1,34 +1,91 @@
 package nl.andrewl.railsignalapi.live;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import nl.andrewl.railsignalapi.dao.LinkTokenRepository;
+import nl.andrewl.railsignalapi.dao.ComponentRepository;
+import nl.andrewl.railsignalapi.model.component.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A service that manages all the active component downlink connections.
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ComponentDownlinkService {
 	private final Map<ComponentDownlink, Set<Long>> componentDownlinks = new HashMap<>();
+	private final Map<Long, Set<ComponentDownlink>> downlinksByCId = new HashMap<>();
 
-	public synchronized void registerDownlink(ComponentDownlink downlink, Set<Long> componentIds) {
-		componentDownlinks.put(downlink, componentIds);
+	private final LinkTokenRepository tokenRepository;
+	private final ComponentRepository<Component> componentRepository;
+
+	/**
+	 * Registers a new active downlink to one or more components.
+	 * @param downlink The downlink to register.
+	 */
+	@Transactional
+	public synchronized void registerDownlink(ComponentDownlink downlink) {
+		Set<Component> components = tokenRepository.findById(downlink.getTokenId()).orElseThrow().getComponents();
+		componentDownlinks.put(downlink, components.stream().map(Component::getId).collect(Collectors.toSet()));
+		for (var c : components) {
+			c.setOnline(true);
+			Set<ComponentDownlink> downlinks = downlinksByCId.computeIfAbsent(c.getId(), aLong -> new HashSet<>());
+			downlinks.add(downlink);
+		}
+		componentRepository.saveAll(components);
+		log.info("Registered downlink with token id {}.", downlink.getTokenId());
 	}
 
+	/**
+	 * De-registers a downlink to components. This should be called when this
+	 * downlink is closed.
+	 * @param downlink The downlink to de-register.
+	 */
+	@Transactional
 	public synchronized void deregisterDownlink(ComponentDownlink downlink) {
-		componentDownlinks.remove(downlink);
+		Set<Long> componentIds = componentDownlinks.remove(downlink);
+		if (componentIds != null) {
+			for (var cId : componentIds) {
+				componentRepository.findById(cId).ifPresent(component -> {
+					component.setOnline(false);
+					componentRepository.save(component);
+				});
+				Set<ComponentDownlink> downlinks = downlinksByCId.get(cId);
+				if (downlinks != null) {
+					downlinks.remove(downlink);
+					if (downlinks.isEmpty()) {
+						downlinksByCId.remove(cId);
+					}
+				}
+			}
+		}
+		log.info("De-registered downlink with token id {}.", downlink.getTokenId());
 	}
 
+	@Transactional
 	public synchronized void deregisterDownlink(long tokenId) {
 		List<ComponentDownlink> removeSet = componentDownlinks.keySet().stream()
-				.filter(downlink -> downlink.getId() == tokenId).toList();
+				.filter(downlink -> downlink.getTokenId() == tokenId).toList();
 		for (var downlink : removeSet) {
-			componentDownlinks.remove(downlink);
+			deregisterDownlink(downlink);
+		}
+	}
+
+	public void sendMessage(long componentId, Object msg) {
+		var downlinks = downlinksByCId.get(componentId);
+		if (downlinks != null) {
+			for (var downlink : downlinks) {
+				try {
+					downlink.send(msg);
+				} catch (Exception e) {
+					log.warn("An error occurred while sending a message to downlink with token id " + downlink.getTokenId(), e);
+				}
+			}
 		}
 	}
 }

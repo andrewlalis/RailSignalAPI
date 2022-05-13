@@ -1,8 +1,8 @@
 package nl.andrewl.railsignalapi.live.websocket;
 
 import lombok.RequiredArgsConstructor;
-import nl.andrewl.railsignalapi.dao.ComponentAccessTokenRepository;
-import nl.andrewl.railsignalapi.model.ComponentAccessToken;
+import nl.andrewl.railsignalapi.dao.LinkTokenRepository;
+import nl.andrewl.railsignalapi.model.LinkToken;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -22,7 +22,7 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class ComponentWebsocketHandshakeInterceptor implements HandshakeInterceptor {
-	private final ComponentAccessTokenRepository tokenRepository;
+	private final LinkTokenRepository tokenRepository;
 	private final PasswordEncoder passwordEncoder;
 
 	@Override
@@ -34,11 +34,11 @@ public class ComponentWebsocketHandshakeInterceptor implements HandshakeIntercep
 			return false;
 		}
 		String rawToken = query.substring(tokenIdx);
-		if (rawToken.length() < ComponentAccessToken.PREFIX_SIZE) {
+		if (rawToken.length() < LinkToken.PREFIX_SIZE) {
 			response.setStatusCode(HttpStatus.BAD_REQUEST);
 			return false;
 		}
-		Iterable<ComponentAccessToken> tokens = tokenRepository.findAllByTokenPrefix(rawToken.substring(0, ComponentAccessToken.PREFIX_SIZE));
+		Iterable<LinkToken> tokens = tokenRepository.findAllByTokenPrefix(rawToken.substring(0, LinkToken.PREFIX_SIZE));
 		for (var token : tokens) {
 			if (passwordEncoder.matches(rawToken, token.getTokenHash())) {
 				attributes.put("tokenId", token.getId());

@@ -28,6 +28,7 @@
     </table>
     <SignalComponentView v-if="component.type === 'SIGNAL'" :signal="component" />
     <SegmentBoundaryNodeComponentView v-if="component.type === 'SEGMENT_BOUNDARY'" :node="component" />
+    <SwitchComponentView v-if="component.type === 'SWITCH'" :sw="component"/>
     <PathNodeComponentView v-if="component.connectedNodes" :pathNode="component" :railSystem="railSystem" />
     <button @click="removeComponent()" class="btn btn-sm btn-danger">Remove</button>
   </div>
@@ -45,9 +46,11 @@ import PathNodeComponentView from "./PathNodeComponentView.vue";
 import SegmentBoundaryNodeComponentView from "./SegmentBoundaryNodeComponentView.vue";
 import {useRailSystemsStore} from "../../../stores/railSystemsStore";
 import ConfirmModal from "../../ConfirmModal.vue";
+import SwitchComponentView from "./SwitchComponentView.vue";
 
 export default {
   components: {
+    SwitchComponentView,
     ConfirmModal,
     SegmentBoundaryNodeComponentView,
     SignalComponentView,

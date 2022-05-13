@@ -80,15 +80,15 @@ export const useRailSystemsStore = defineStore('RailSystemsStore', {
                 this.websocket.close();
             }
             console.log(this.wsUrl);
-            this.websocket = new WebSocket(this.wsUrl);
+            this.websocket = new WebSocket(this.wsUrl + "/" + this.selectedRailSystem.id);
             this.websocket.onopen = event => {
                 console.log("Opened websocket connection.");
             };
             this.websocket.onclose = event => {
                 console.log("Closed websocket connection.");
             };
-            this.websocket.onmessage = () => {
-
+            this.websocket.onmessage = (msg) => {
+                console.log(msg);
             };
         },
         addSegment(name) {

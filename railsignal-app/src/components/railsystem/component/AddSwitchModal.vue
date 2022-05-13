@@ -29,7 +29,7 @@
               </ul>
             </div>
             <div class="mb-3">
-              <label for="addSwitchConfigs" class="form-label">Segment</label>
+              <label for="addSwitchConfigs" class="form-label">Select two nodes this switch can connect.</label>
               <select id="addSwitchConfigs" class="form-select" multiple v-model="formData.possibleConfigQueue">
                 <option v-for="node in getEligibleNodes()" :key="node.id" :value="node">
                   {{node.name}}

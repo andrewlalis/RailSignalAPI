@@ -4,7 +4,7 @@
     <tbody>
       <tr>
         <th>Connected to</th>
-        <td>{{signal.segment.name}}</td>
+        <td>{{signal.segment.name}}, Occupied: {{signal.segment.occupied}}</td>
       </tr>
     </tbody>
   </table>

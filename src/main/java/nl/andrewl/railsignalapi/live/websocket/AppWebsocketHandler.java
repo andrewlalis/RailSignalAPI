@@ -16,20 +16,21 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 @RequiredArgsConstructor
 @Slf4j
 public class AppWebsocketHandler extends TextWebSocketHandler {
+	private final AppUpdateService appUpdateService;
+
 	@Override
-	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		super.afterConnectionEstablished(session);
-		log.info("App websocket session established.");
+	public void afterConnectionEstablished(WebSocketSession session) {
+		long railSystemId = (long) session.getAttributes().get("railSystemId");
+		appUpdateService.registerSession(railSystemId, session);
 	}
 
 	@Override
-	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-		super.handleTextMessage(session, message);
+	protected void handleTextMessage(WebSocketSession session, TextMessage message) {
+		// Don't do anything with messages from the web app. At least not yet.
 	}
 
 	@Override
-	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-		super.afterConnectionClosed(session, status);
-		log.info("App websocket session closed.");
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
+		appUpdateService.deregisterSession(session);
 	}
 }
