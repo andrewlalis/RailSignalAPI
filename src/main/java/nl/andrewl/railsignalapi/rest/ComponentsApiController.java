@@ -4,12 +4,15 @@ import lombok.RequiredArgsConstructor;
 import nl.andrewl.railsignalapi.rest.dto.PathNodeUpdatePayload;
 import nl.andrewl.railsignalapi.rest.dto.component.in.ComponentPayload;
 import nl.andrewl.railsignalapi.rest.dto.component.out.ComponentResponse;
+import nl.andrewl.railsignalapi.rest.dto.component.out.SimpleComponentResponse;
 import nl.andrewl.railsignalapi.service.ComponentCreationService;
 import nl.andrewl.railsignalapi.service.ComponentService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -22,6 +25,15 @@ public class ComponentsApiController {
 	@GetMapping
 	public List<ComponentResponse> getAllComponents(@PathVariable long rsId) {
 		return componentService.getComponents(rsId);
+	}
+
+	@GetMapping(path = "/search")
+	public Page<SimpleComponentResponse> searchComponents(
+			@RequestParam(name = "q", required = false) String searchQuery,
+			@PageableDefault(sort = "name")
+			Pageable pageable
+	) {
+		return componentService.search(searchQuery, pageable);
 	}
 
 	@GetMapping(path = "/{cId}")

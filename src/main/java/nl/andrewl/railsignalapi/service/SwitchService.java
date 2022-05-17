@@ -9,6 +9,9 @@ import nl.andrewl.railsignalapi.model.component.Switch;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service for managing switches.
+ */
 @Service
 @RequiredArgsConstructor
 public class SwitchService {

@@ -3,7 +3,9 @@ package nl.andrewl.railsignalapi.dao;
 import nl.andrewl.railsignalapi.model.RailSystem;
 import nl.andrewl.railsignalapi.model.component.Component;
 import nl.andrewl.railsignalapi.model.component.Position;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -11,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ComponentRepository<T extends Component> extends JpaRepository<T, Long> {
+public interface ComponentRepository<T extends Component> extends JpaRepository<T, Long>, JpaSpecificationExecutor<T> {
 	Optional<T> findByIdAndRailSystemId(long id, long rsId);
 
 	boolean existsByNameAndRailSystem(String name, RailSystem rs);
