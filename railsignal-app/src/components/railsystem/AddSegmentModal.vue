@@ -47,6 +47,7 @@
 <script>
 import {useRailSystemsStore} from "../../stores/railSystemsStore";
 import {Modal} from "bootstrap";
+import {createSegment} from "../../api/segments";
 
 export default {
   name: "AddSegmentModal",
@@ -67,7 +68,7 @@ export default {
   methods: {
     formSubmitted() {
       const modal = Modal.getInstance(document.getElementById("addSegmentModal"));
-      this.rsStore.addSegment(this.formData.name)
+      createSegment(this.rsStore.selectedRailSystem, this.formData.name)
           .then(() => {
             this.formData.name = "";
             modal.hide();

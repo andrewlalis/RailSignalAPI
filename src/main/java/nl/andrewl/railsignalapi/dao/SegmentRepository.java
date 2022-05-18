@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface SegmentRepository extends JpaRepository<Segment, Long> {
 	boolean existsByNameAndRailSystem(String name, RailSystem rs);
 
-	List<Segment> findAllByRailSystemId(long rsId);
+	List<Segment> findAllByRailSystemIdOrderByName(long rsId);
 
 	Optional<Segment> findByIdAndRailSystemId(long id, long rsId);
 

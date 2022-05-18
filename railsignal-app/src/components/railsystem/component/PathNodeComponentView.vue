@@ -7,7 +7,7 @@
           class="list-group-item"
       >
         {{node.name}}
-        <button @click="rsStore.removeConnection(pathNode, node)" class="btn btn-sm btn-danger float-end">
+        <button @click="remove(node)" class="btn btn-sm btn-danger float-end">
           Remove
         </button>
       </li>
@@ -16,7 +16,7 @@
       There are no connected nodes.
     </p>
     <form
-        @submit.prevent="rsStore.addConnection(pathNode, formData.nodeToAdd)"
+        @submit.prevent="add(formData.nodeToAdd)"
         v-if="getEligibleConnections().length > 0"
         class="input-group mb-3"
     >
@@ -30,16 +30,10 @@
 </template>
 
 <script>
-import {useRailSystemsStore} from "../../../stores/railSystemsStore";
+import {addConnection, removeConnection} from "../../../api/paths";
 
 export default {
   name: "PathNodeComponentView",
-  setup() {
-    const rsStore = useRailSystemsStore();
-    return {
-      rsStore
-    };
-  },
   props: {
     pathNode: {
       type: Object,
@@ -74,6 +68,12 @@ export default {
         }
       }
       return nodes;
+    },
+    remove(node) {
+      removeConnection(this.railSystem, this.pathNode, node);
+    },
+    add(node) {
+      addConnection(this.railSystem, this.pathNode, node);
     }
   }
 }

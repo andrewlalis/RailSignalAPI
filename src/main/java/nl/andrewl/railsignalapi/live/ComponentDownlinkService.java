@@ -2,8 +2,9 @@ package nl.andrewl.railsignalapi.live;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nl.andrewl.railsignalapi.dao.LinkTokenRepository;
 import nl.andrewl.railsignalapi.dao.ComponentRepository;
+import nl.andrewl.railsignalapi.dao.LinkTokenRepository;
+import nl.andrewl.railsignalapi.live.websocket.AppUpdateService;
 import nl.andrewl.railsignalapi.model.component.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ public class ComponentDownlinkService {
 
 	private final LinkTokenRepository tokenRepository;
 	private final ComponentRepository<Component> componentRepository;
+	private final AppUpdateService appUpdateService;
 
 	/**
 	 * Registers a new active downlink to one or more components.
@@ -34,10 +36,11 @@ public class ComponentDownlinkService {
 		componentDownlinks.put(downlink, components.stream().map(Component::getId).collect(Collectors.toSet()));
 		for (var c : components) {
 			c.setOnline(true);
+			componentRepository.save(c);
+			appUpdateService.sendComponentUpdate(c.getRailSystem().getId(), c.getId());
 			Set<ComponentDownlink> downlinks = downlinksByCId.computeIfAbsent(c.getId(), aLong -> new HashSet<>());
 			downlinks.add(downlink);
 		}
-		componentRepository.saveAll(components);
 		log.info("Registered downlink with token id {}.", downlink.getTokenId());
 	}
 
@@ -54,6 +57,7 @@ public class ComponentDownlinkService {
 				componentRepository.findById(cId).ifPresent(component -> {
 					component.setOnline(false);
 					componentRepository.save(component);
+					appUpdateService.sendComponentUpdate(component.getRailSystem().getId(), component.getId());
 				});
 				Set<ComponentDownlink> downlinks = downlinksByCId.get(cId);
 				if (downlinks != null) {
@@ -63,6 +67,11 @@ public class ComponentDownlinkService {
 					}
 				}
 			}
+		}
+		try {
+			downlink.shutdown();
+		} catch (Exception e) {
+			log.warn("An error occurred while shutting down a component downlink.", e);
 		}
 		log.info("De-registered downlink with token id {}.", downlink.getTokenId());
 	}

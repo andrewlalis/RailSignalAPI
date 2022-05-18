@@ -13,7 +13,9 @@ import java.io.IOException;
 import java.net.Socket;
 
 /**
- * This link manager is started when a TCP link is established.
+ * This link manager is started when a TCP link is established, and acts as
+ * both a downlink to the component that we can send messages through, and an
+ * uplink that receives messages from the component.
  */
 @Slf4j
 public class TcpLinkManager extends ComponentDownlink implements Runnable {
@@ -53,12 +55,9 @@ public class TcpLinkManager extends ComponentDownlink implements Runnable {
 		downlinkService.deregisterDownlink(this);
 	}
 
-	public void shutdown() {
-		try {
-			this.socket.close();
-		} catch (IOException e) {
-			log.warn("An error occurred while closing TCP socket.", e);
-		}
+	@Override
+	public void shutdown() throws IOException {
+		socket.close();
 	}
 
 	@Override

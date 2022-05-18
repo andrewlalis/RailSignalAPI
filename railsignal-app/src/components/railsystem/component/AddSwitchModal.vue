@@ -56,6 +56,7 @@
 <script>
 import {useRailSystemsStore} from "../../../stores/railSystemsStore";
 import {Modal} from "bootstrap";
+import {createComponent} from "../../../api/components";
 
 export default {
   name: "AddSwitchModal",
@@ -84,7 +85,7 @@ export default {
   methods: {
     formSubmitted() {
       const modal = Modal.getInstance(document.getElementById("addSwitchModal"));
-      this.rsStore.addComponent(this.formData)
+      createComponent(this.rsStore.selectedRailSystem, this.formData)
           .then(() => {
             modal.hide();
           })

@@ -1,15 +1,14 @@
 package nl.andrewl.railsignalapi.live.tcp_socket;
 
 import lombok.extern.slf4j.Slf4j;
-import nl.andrewl.railsignalapi.dao.LinkTokenRepository;
 import nl.andrewl.railsignalapi.live.ComponentDownlinkService;
 import nl.andrewl.railsignalapi.live.ComponentUplinkMessageHandler;
 import nl.andrewl.railsignalapi.model.LinkToken;
+import nl.andrewl.railsignalapi.service.LinkTokenService;
 import nl.andrewl.railsignalapi.util.JsonUtils;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.io.DataInputStream;
@@ -19,6 +18,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -43,19 +43,16 @@ public class TcpSocketServer {
 	private final ServerSocket serverSocket;
 	private final Set<TcpLinkManager> linkManagers;
 
-	private final LinkTokenRepository tokenRepository;
-	private final PasswordEncoder passwordEncoder;
+	private final LinkTokenService tokenService;
 	private final ComponentDownlinkService componentDownlinkService;
 	private final ComponentUplinkMessageHandler uplinkMessageHandler;
 
 	public TcpSocketServer(
-			LinkTokenRepository tokenRepository,
-			PasswordEncoder passwordEncoder,
+			LinkTokenService linkTokenService,
 			ComponentDownlinkService componentDownlinkService,
 			ComponentUplinkMessageHandler uplinkMessageHandler
 	) throws IOException {
-		this.tokenRepository = tokenRepository;
-		this.passwordEncoder = passwordEncoder;
+		this.tokenService = linkTokenService;
 		this.componentDownlinkService = componentDownlinkService;
 		this.uplinkMessageHandler = uplinkMessageHandler;
 
@@ -86,7 +83,9 @@ public class TcpSocketServer {
 	@EventListener(ContextClosedEvent.class)
 	public void closeServer() throws IOException {
 		serverSocket.close();
-		for (var linkManager : linkManagers) linkManager.shutdown();
+		for (var linkManager : linkManagers) {
+			linkManager.shutdown();
+		}
 	}
 
 	private void initializeConnection(Socket socket) throws IOException {
@@ -98,18 +97,17 @@ public class TcpSocketServer {
 			JsonUtils.writeJsonString(out, new ConnectMessage(false, "Invalid or missing token."));
 			socket.close();
 		} else {
-			Iterable<LinkToken> tokens = tokenRepository.findAllByTokenPrefix(rawToken.substring(0, LinkToken.PREFIX_SIZE));
-			for (var token : tokens) {
-				if (passwordEncoder.matches(rawToken, token.getTokenHash())) {
-					JsonUtils.writeJsonString(out, new ConnectMessage(true, "Connection established."));
-					var linkManager = new TcpLinkManager(token.getId(), socket, componentDownlinkService, uplinkMessageHandler);
-					new Thread(linkManager, "linkManager-" + token.getId()).start();
-					linkManagers.add(linkManager);
-					return;
-				}
+			Optional<LinkToken> optionalToken = tokenService.validateToken(rawToken);
+			if (optionalToken.isPresent()) {
+				LinkToken token = optionalToken.get();
+				JsonUtils.writeJsonString(out, new ConnectMessage(true, "Connection established."));
+				var linkManager = new TcpLinkManager(token.getId(), socket, componentDownlinkService, uplinkMessageHandler);
+				new Thread(linkManager, "LinkManager-" + token.getId()).start();
+				linkManagers.add(linkManager);
+			} else {
+				JsonUtils.writeJsonString(out, new ConnectMessage(false, "Invalid token."));
+				socket.close();
 			}
-			JsonUtils.writeJsonString(out, new ConnectMessage(false, "Invalid token."));
-			socket.close();
 		}
 	}
 }

@@ -32,6 +32,7 @@ public class AppUpdateService {
 	public synchronized void registerSession(long rsId, WebSocketSession session) {
 		Set<WebSocketSession> sessionsForRs = sessions.computeIfAbsent(rsId, x -> new HashSet<>());
 		sessionsForRs.add(session);
+		log.info("Registered a new app websocket session for rail system id " + rsId);
 	}
 
 	public synchronized void deregisterSession(WebSocketSession session) {
@@ -49,6 +50,7 @@ public class AppUpdateService {
 		for (var orphanRsId : orphans) {
 			sessions.remove(orphanRsId);
 		}
+		log.info("De-registered an app websocket session.");
 	}
 
 	public synchronized void sendUpdate(long rsId, Object msg) {

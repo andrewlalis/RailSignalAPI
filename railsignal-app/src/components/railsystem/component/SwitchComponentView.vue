@@ -1,6 +1,10 @@
 <template>
     <h5>Switch Configurations</h5>
-    <ul class="list-group list-group-flush border" v-if="sw.possibleConfigurations.length > 0" style="overflow: auto; max-height: 150px;">
+    <ul
+        class="list-group list-group-flush border mb-2"
+        v-if="sw.possibleConfigurations.length > 0"
+        style="overflow: auto; max-height: 150px;"
+    >
       <li
           v-for="config in sw.possibleConfigurations"
           :key="config.id"

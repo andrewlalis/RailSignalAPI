@@ -35,7 +35,7 @@ public class SegmentService {
 
 	@Transactional(readOnly = true)
 	public List<SegmentResponse> getSegments(long rsId) {
-		return segmentRepository.findAllByRailSystemId(rsId).stream().map(SegmentResponse::new).toList();
+		return segmentRepository.findAllByRailSystemIdOrderByName(rsId).stream().map(SegmentResponse::new).toList();
 	}
 
 	@Transactional(readOnly = true)

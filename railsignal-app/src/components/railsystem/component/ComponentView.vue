@@ -1,7 +1,9 @@
 <template>
   <div>
     <h3>{{component.name}}</h3>
-    <small class="text-muted">{{component.type}}</small>
+    <small class="text-muted">
+      {{component.type}}
+    </small>
     <table class="table">
       <tbody>
         <tr>
@@ -21,16 +23,13 @@
             </table>
           </td>
         </tr>
-        <tr>
-          <th>Online</th><td>{{component.online}}</td>
-        </tr>
       </tbody>
     </table>
     <SignalComponentView v-if="component.type === 'SIGNAL'" :signal="component" />
     <SegmentBoundaryNodeComponentView v-if="component.type === 'SEGMENT_BOUNDARY'" :node="component" />
     <SwitchComponentView v-if="component.type === 'SWITCH'" :sw="component"/>
     <PathNodeComponentView v-if="component.connectedNodes" :pathNode="component" :railSystem="railSystem" />
-    <button @click="removeComponent()" class="btn btn-sm btn-danger">Remove</button>
+    <button @click="remove()" class="btn btn-sm btn-danger">Remove</button>
   </div>
   <ConfirmModal
       ref="removeConfirm"
@@ -47,6 +46,7 @@ import SegmentBoundaryNodeComponentView from "./SegmentBoundaryNodeComponentView
 import {useRailSystemsStore} from "../../../stores/railSystemsStore";
 import ConfirmModal from "../../ConfirmModal.vue";
 import SwitchComponentView from "./SwitchComponentView.vue";
+import {removeComponent} from "../../../api/components";
 
 export default {
   components: {
@@ -73,9 +73,12 @@ export default {
     }
   },
   methods: {
-    removeComponent() {
+    remove() {
       this.$refs.removeConfirm.showConfirm()
-          .then(() => this.rsStore.removeComponent(this.component.id));
+          .then(() => {
+            removeComponent(this.rsStore.selectedRailSystem, this.component.id)
+                .catch(console.error);
+          });
     }
   }
 }

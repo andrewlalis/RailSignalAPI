@@ -36,6 +36,7 @@
 <script>
 import {useRailSystemsStore} from "../../stores/railSystemsStore";
 import {Modal} from "bootstrap";
+import {createRailSystem} from "../../api/railSystems";
 
 export default {
   name: "AddRailSystem",
@@ -55,7 +56,7 @@ export default {
   },
   methods: {
     formSubmitted() {
-      this.rsStore.createRailSystem(this.formData.rsName)
+      createRailSystem(this.rsStore, this.formData.rsName)
           .then(rs => {
             this.formData.rsName = "";
             const modal = Modal.getInstance(document.getElementById("addRailSystemModal"));

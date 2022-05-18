@@ -64,6 +64,7 @@
 <script>
 import {useRailSystemsStore} from "../../../stores/railSystemsStore";
 import {Modal} from "bootstrap";
+import {createComponent} from "../../../api/components";
 
 export default {
   name: "AddSegmentBoundaryModal",
@@ -94,7 +95,7 @@ export default {
     formSubmitted() {
       const modal = Modal.getInstance(document.getElementById("addSegmentBoundaryModal"));
       this.formData.segments = [this.formData.segmentA, this.formData.segmentB];
-      this.rsStore.addComponent(this.formData)
+      createComponent(this.rsStore.selectedRailSystem, this.formData)
           .then(() => {
             modal.hide();
           })

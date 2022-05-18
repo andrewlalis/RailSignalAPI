@@ -15,6 +15,7 @@ public abstract class ComponentDownlink {
 	}
 
 	public abstract void send(Object msg) throws Exception;
+	public abstract void shutdown() throws Exception;
 
 	@Override
 	public boolean equals(Object o) {

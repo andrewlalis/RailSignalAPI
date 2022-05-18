@@ -17,4 +17,9 @@ public class WebsocketDownlink extends ComponentDownlink {
 	public void send(Object msg) throws Exception {
 		webSocketSession.sendMessage(new TextMessage(JsonUtils.toJson(msg)));
 	}
+
+	@Override
+	public void shutdown() throws Exception {
+		webSocketSession.close();
+	}
 }

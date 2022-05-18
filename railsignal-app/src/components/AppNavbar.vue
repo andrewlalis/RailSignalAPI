@@ -23,7 +23,7 @@
           </li>
           <li class="nav-item me-2" v-if="rsStore.selectedRailSystem !== null">
             <button
-                @click="removeRailSystem()"
+                @click="remove()"
                 class="btn btn-danger btn-sm"
                 type="button"
             >
@@ -57,6 +57,7 @@
 import {useRailSystemsStore} from "../stores/railSystemsStore";
 import AddRailSystemModal from "./railsystem/AddRailSystemModal.vue";
 import ConfirmModal from "./ConfirmModal.vue";
+import {refreshRailSystems, removeRailSystem} from "../api/railSystems";
 
 export default {
   name: "AppNavbar",
@@ -68,12 +69,12 @@ export default {
     };
   },
   mounted() {
-    this.rsStore.refreshRailSystems();
+    refreshRailSystems(this.rsStore);
   },
   methods: {
-    removeRailSystem() {
+    remove() {
       this.$refs.confirmModal.showConfirm()
-          .then(() => this.rsStore.removeRailSystem(this.rsStore.selectedRailSystem));
+          .then(() => removeRailSystem(this.rsStore, this.rsStore.selectedRailSystem.id));
 
     }
   }
