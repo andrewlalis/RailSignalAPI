@@ -1,11 +1,26 @@
 import axios from "axios";
 import {API_URL} from "./constants";
 
+export class RailSystem {
+    constructor(data) {
+        this.id = data.id;
+        this.name = data.name;
+        this.segments = [];
+        this.components = [];
+        this.websocket = null;
+        this.selectedComponent = null;
+    }
+}
+
 export function refreshRailSystems(rsStore) {
     return new Promise(resolve => {
         axios.get(`${API_URL}/rs`)
             .then(response => {
-                rsStore.railSystems = response.data;
+                const rsItems = response.data;
+                rsStore.railSystems.length = 0;
+                for (let i = 0; i < rsItems.length; i++) {
+                    rsStore.railSystems.push(new RailSystem(rsItems[i]));
+                }
                 resolve();
             })
             .catch(error => console.error(error));

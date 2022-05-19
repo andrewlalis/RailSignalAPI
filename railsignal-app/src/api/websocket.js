@@ -1,9 +1,11 @@
 import {WS_URL} from "./constants";
 
+/**
+ * Establishes a websocket connection to the given rail system.
+ * @param {RailSystem} rs
+ */
 export function establishWebsocketConnection(rs) {
-    if (rs.websocket) {
-        rs.websocket.close();
-    }
+    closeWebsocketConnection(rs);
     rs.websocket = new WebSocket(`${WS_URL}/${rs.id}`);
     rs.websocket.onopen = () => {
         console.log("Opened websocket connection to rail system " + rs.id);
@@ -25,6 +27,10 @@ export function establishWebsocketConnection(rs) {
     };
 }
 
+/**
+ * Closes the websocket connection to a rail system, if possible.
+ * @param {RailSystem} rs
+ */
 export function closeWebsocketConnection(rs) {
     if (rs.websocket) {
         rs.websocket.close();

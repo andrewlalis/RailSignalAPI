@@ -48,6 +48,27 @@ export function getComponent(rs, id) {
     });
 }
 
+/**
+ * Searches through the rail system's components.
+ * @param {RailSystem} rs
+ * @param {string|null} searchQuery
+ * @return {Promise<Object>}
+ */
+export function searchComponents(rs, searchQuery) {
+    return new Promise((resolve, reject) => {
+        const params = {
+            page: 0,
+            size: 25
+        };
+        if (searchQuery) params.q = searchQuery;
+        axios.get(`${API_URL}/rs/${rs.id}/c/search`, {params: params})
+            .then(response => {
+                resolve(response.data);
+            })
+            .catch(reject);
+    });
+}
+
 export function createComponent(rs, data) {
     return new Promise((resolve, reject) => {
         axios.post(`${API_URL}/rs/${rs.id}/c`, data)

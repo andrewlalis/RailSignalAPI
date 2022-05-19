@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.criteria.Predicate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,12 +44,14 @@ public class ComponentService {
 	}
 
 	@Transactional(readOnly = true)
-	public Page<SimpleComponentResponse> search(String searchQuery, Pageable pageable) {
+	public Page<SimpleComponentResponse> search(long rsId, String searchQuery, Pageable pageable) {
 		return componentRepository.findAll((root, query, cb) -> {
+			List<Predicate> predicates = new ArrayList<>(2);
+			predicates.add(cb.equal(root.get("railSystem").get("id"), rsId));
 			if (searchQuery != null && !searchQuery.isBlank()) {
-				return cb.like(cb.lower(root.get("name")), '%' + searchQuery.toLowerCase() + '%');
+				predicates.add(cb.like(cb.lower(root.get("name")), '%' + searchQuery.toLowerCase() + '%'));
 			}
-			return cb.and();
+			return cb.and(predicates.toArray(new Predicate[0]));
 		}, pageable).map(SimpleComponentResponse::new);
 	}
 

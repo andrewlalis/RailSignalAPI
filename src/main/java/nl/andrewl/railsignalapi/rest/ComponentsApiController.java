@@ -29,11 +29,12 @@ public class ComponentsApiController {
 
 	@GetMapping(path = "/search")
 	public Page<SimpleComponentResponse> searchComponents(
+			@PathVariable long rsId,
 			@RequestParam(name = "q", required = false) String searchQuery,
 			@PageableDefault(sort = "name")
 			Pageable pageable
 	) {
-		return componentService.search(searchQuery, pageable);
+		return componentService.search(rsId, searchQuery, pageable);
 	}
 
 	@GetMapping(path = "/{cId}")

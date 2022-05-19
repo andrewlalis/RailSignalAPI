@@ -2,6 +2,12 @@ import axios from "axios";
 import {API_URL} from "./constants";
 import {refreshSomeComponents} from "./components";
 
+/**
+ * Updates the connections to a path node.
+ * @param {RailSystem} rs The rail system to which the node belongs.
+ * @param {Object} node The node to update.
+ * @returns {Promise}
+ */
 export function updateConnections(rs, node) {
     return new Promise((resolve, reject) => {
         axios.patch(
@@ -16,11 +22,25 @@ export function updateConnections(rs, node) {
     });
 }
 
+/**
+ * Adds a connection to a path node.
+ * @param {RailSystem} rs
+ * @param {Object} node
+ * @param {Object} other
+ * @returns {Promise}
+ */
 export function addConnection(rs, node, other) {
     node.connectedNodes.push(other);
     return updateConnections(rs, node);
 }
 
+/**
+ * Removes a connection from a path node.
+ * @param {RailSystem} rs
+ * @param {Object} node
+ * @param {Object} other
+ * @returns {Promise}
+ */
 export function removeConnection(rs, node, other) {
     const idx = node.connectedNodes.findIndex(n => n.id === other.id);
     return new Promise((resolve, reject) => {

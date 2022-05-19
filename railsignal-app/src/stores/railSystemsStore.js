@@ -5,14 +5,12 @@ import {closeWebsocketConnection, establishWebsocketConnection} from "../api/web
 
 export const useRailSystemsStore = defineStore('RailSystemsStore', {
     state: () => ({
+        /**
+         * @type {RailSystem[]}
+         */
         railSystems: [],
         /**
-         * @type {{
-         * segments: [Object],
-         * components: [Object],
-         * selectedComponent: Object | null,
-         * websocket: WebSocket | null
-         * } | null}
+         * @type {RailSystem | null}
          */
         selectedRailSystem: null
     }),

@@ -1,7 +1,7 @@
 <template>
   <h3>Rail System: <em>{{railSystem.name}}</em></h3>
   <SegmentsView :segments="railSystem.segments" v-if="railSystem.segments"/>
-  <div class="dropdown">
+  <div class="dropdown d-inline-block me-2">
     <button class="btn btn-success btn-sm dropdown-toggle" type="button" id="railSystemAddComponentsToggle" data-bs-toggle="dropdown" aria-expanded="false">
       Add Component
     </button>
@@ -48,6 +48,17 @@
       </li>
     </ul>
   </div>
+  <div v-if="createLinkTokenAllowed()" class="d-inline-block">
+    <button
+      class="btn btn-success btn-sm"
+      type="button"
+      data-bs-toggle="modal"
+      data-bs-target="#createLinkTokenModal"
+    >
+      Create Link Token
+    </button>
+    <CreateLinkTokenModal :railSystem="railSystem" />
+  </div>
   <AddSegmentModal />
   <AddSignalModal v-if="addSignalAllowed()" />
   <AddSegmentBoundaryModal v-if="addSegmentBoundaryAllowed()" />
@@ -60,10 +71,13 @@ import AddSegmentModal from "./AddSegmentModal.vue";
 import AddSignalModal from "./component/AddSignalModal.vue";
 import AddSegmentBoundaryModal from "./component/AddSegmentBoundaryModal.vue";
 import AddSwitchModal from "./component/AddSwitchModal.vue";
+import CreateLinkTokenModal from "./CreateLinkTokenModal.vue";
+import {RailSystem} from "../../api/railSystems";
 
 export default {
   name: "RailSystemPropertiesView",
   components: {
+    CreateLinkTokenModal,
     AddSwitchModal,
     AddSegmentBoundaryModal,
     AddSignalModal,
@@ -72,19 +86,22 @@ export default {
   },
   props: {
     railSystem: {
-      type: Object,
+      type: RailSystem,
       required: true
     }
   },
   methods: {
     addSignalAllowed() {
-      return this.railSystem.segments && this.railSystem.segments.length > 0
+      return this.railSystem.segments && this.railSystem.segments.length > 0;
     },
     addSegmentBoundaryAllowed() {
-      return this.railSystem.segments && this.railSystem.segments.length > 1
+      return this.railSystem.segments && this.railSystem.segments.length > 1;
     },
     addSwitchAllowed() {
-      return this.railSystem.components && this.railSystem.components.length > 1
+      return this.railSystem.components && this.railSystem.components.length > 1;
+    },
+    createLinkTokenAllowed() {
+      return this.railSystem.components && this.railSystem.components.length > 0;
     }
   }
 }

@@ -15,6 +15,7 @@
                 id="railSystemSelect"
                 v-model="rsStore.selectedRailSystem"
                 class="form-select form-select-sm"
+                @change="rsStore.onSelectedRailSystemChanged()"
             >
               <option v-for="rs in rsStore.railSystems" :key="rs.id" :value="rs">
                 {{rs.name}}
