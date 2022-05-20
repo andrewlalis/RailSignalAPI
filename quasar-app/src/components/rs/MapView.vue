@@ -1,14 +1,12 @@
 <template>
-  <div class="row bg-green-4">
-    <div class="col-md-8 bg-blue-2" id="railSystemMapCanvasContainer">
+  <div class="row">
+    <div class="col-md-8" id="railSystemMapCanvasContainer">
       <canvas id="railSystemMapCanvas" height="800">
         Your browser doesn't support canvas.
       </canvas>
     </div>
-    <div class="col-md-4 bg-amber">
-      <p>
-        Info panel
-      </p>
+    <div class="col-md-4" v-if="railSystem.selectedComponent">
+      <selected-component-view :component="railSystem.selectedComponent" />
     </div>
   </div>
 
@@ -17,9 +15,11 @@
 <script>
 import { RailSystem } from "src/api/railSystems";
 import { draw, initMap } from "src/render/mapRenderer";
+import SelectedComponentView from "components/rs/SelectedComponentView.vue";
 
 export default {
   name: "MapView",
+  components: { SelectedComponentView },
   props: {
     railSystem: {
       type: RailSystem,

@@ -2,8 +2,8 @@
 Helper functions to actually perform rendering of different components.
 */
 
-import {getScaleFactor, isComponentHovered} from "./mapRenderer";
-import {roundedRect, circle} from "./canvasUtils";
+import { getScaleFactor, isComponentHovered, isComponentSelected } from "./mapRenderer";
+import { circle, roundedRect } from "./canvasUtils";
 
 export function drawComponent(ctx, worldTx, component) {
     const tx = DOMMatrix.fromMatrix(worldTx);
@@ -28,7 +28,7 @@ export function drawComponent(ctx, worldTx, component) {
 
     ctx.setTransform(tx);
     // Draw hovered status.
-    if (isComponentHovered(component)) {
+    if (isComponentHovered(component) || isComponentSelected(component)) {
         ctx.fillStyle = `rgba(255, 255, 0, 0.5)`;
         circle(ctx, 0, 0, 0.75);
         ctx.fill();

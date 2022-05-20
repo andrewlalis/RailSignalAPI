@@ -129,6 +129,10 @@ export function getScaleFactor() {
     return SCALE_VALUES[mapScaleIndex];
 }
 
+/**
+ * Gets a matrix that transforms world coordinates to canvas.
+ * @returns {DOMMatrix}
+ */
 function getWorldTransform() {
     const canvasRect = mapCanvas.getBoundingClientRect();
     const scale = getScaleFactor();
@@ -147,6 +151,10 @@ export function isComponentHovered(component) {
         if (hoveredElements[i].id === component.id) return true;
     }
     return false;
+}
+
+export function isComponentSelected(component) {
+  return railSystem.selectedComponent !== null && railSystem.selectedComponent.id === component.id;
 }
 
 /**
@@ -195,13 +203,15 @@ function onMouseDown(event) {
 }
 
 function onMouseUp() {
+    let finishedDrag = false;
     if (mapDragTranslation !== null) {
         mapTranslation.x += mapDragTranslation.x;
         mapTranslation.y += mapDragTranslation.y;
+        finishedDrag = true;
     }
     if (hoveredElements.length === 1) {
         railSystem.selectedComponent = hoveredElements[0];
-    } else {
+    } else if (!finishedDrag) {
         railSystem.selectedComponent = null;
     }
     mapDragOrigin = null;

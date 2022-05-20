@@ -25,15 +25,7 @@
       show-if-above
       bordered
     >
-      <q-list>
-        <q-item-label header>Rail Systems</q-item-label>
-
-        <rail-system-link
-          v-for="rs in rsStore.railSystems"
-          :key="rs.id"
-          :rail-system="rs"
-        />
-      </q-list>
+      <rail-systems-list :rail-systems="rsStore.railSystems" />
     </q-drawer>
 
     <q-page-container>
@@ -44,17 +36,15 @@
 
 <script>
 import { defineComponent, ref } from "vue";
-import RailSystemLink from "components/RailSystemLink.vue";
+import RailSystemsList from "components/RailSystemsList.vue";
 import { useRailSystemsStore } from "stores/railSystemsStore";
 import { refreshRailSystems } from "src/api/railSystems";
 
 export default defineComponent({
   name: 'MainLayout',
-
   components: {
-    RailSystemLink
+    RailSystemsList
   },
-
   setup () {
     const rsStore = useRailSystemsStore()
     const leftDrawerOpen = ref(false)
