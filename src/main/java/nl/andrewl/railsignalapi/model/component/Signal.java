@@ -3,6 +3,7 @@ package nl.andrewl.railsignalapi.model.component;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import nl.andrewl.railsignalapi.model.RailSystem;
 import nl.andrewl.railsignalapi.model.Segment;
 
@@ -23,6 +24,7 @@ public class Signal extends Component {
 	 * The segment that this signal connects to.
 	 */
 	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	@Setter
 	private Segment segment;
 
 	public Signal(RailSystem railSystem, Position position, String name, Segment segment) {

@@ -1,7 +1,6 @@
 package nl.andrewl.railsignalapi.rest;
 
 import lombok.RequiredArgsConstructor;
-import nl.andrewl.railsignalapi.rest.dto.PathNodeUpdatePayload;
 import nl.andrewl.railsignalapi.rest.dto.component.in.ComponentPayload;
 import nl.andrewl.railsignalapi.rest.dto.component.out.ComponentResponse;
 import nl.andrewl.railsignalapi.rest.dto.component.out.SimpleComponentResponse;
@@ -13,6 +12,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -43,7 +43,7 @@ public class ComponentsApiController {
 	}
 
 	@PostMapping
-	public ComponentResponse createComponent(@PathVariable long rsId, @RequestBody ComponentPayload payload) {
+	public ComponentResponse createComponent(@PathVariable long rsId, @RequestBody @Valid ComponentPayload payload) {
 		return componentCreationService.create(rsId, payload);
 	}
 
@@ -53,8 +53,8 @@ public class ComponentsApiController {
 		return ResponseEntity.noContent().build();
 	}
 
-	@PatchMapping(path = "/{cId}/connectedNodes")
-	public ComponentResponse updateConnectedNodes(@PathVariable long rsId, @PathVariable long cId, @RequestBody PathNodeUpdatePayload payload) {
-		return componentService.updatePath(rsId, cId, payload);
+	@PatchMapping(path = "/{cId}")
+	public ComponentResponse updateComponent(@PathVariable long rsId, @PathVariable long cId, @RequestBody @Valid ComponentPayload payload) {
+		return componentService.updateComponent(rsId, cId, payload);
 	}
 }

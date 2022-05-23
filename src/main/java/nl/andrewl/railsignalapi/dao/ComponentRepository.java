@@ -17,6 +17,7 @@ public interface ComponentRepository<T extends Component> extends JpaRepository<
 	Optional<T> findByIdAndRailSystemId(long id, long rsId);
 
 	boolean existsByNameAndRailSystem(String name, RailSystem rs);
+	boolean existsByNameAndRailSystemId(String name, long rsId);
 
 	@Query("SELECT c FROM Component c " +
 			"WHERE c.railSystem = :rs AND " +

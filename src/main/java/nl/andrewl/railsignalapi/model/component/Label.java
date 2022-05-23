@@ -3,12 +3,11 @@ package nl.andrewl.railsignalapi.model.component;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import nl.andrewl.railsignalapi.model.RailSystem;
-import nl.andrewl.railsignalapi.model.component.Component;
-import nl.andrewl.railsignalapi.model.component.ComponentType;
-import nl.andrewl.railsignalapi.model.component.Position;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
 
 /**
  * A simple label element that allows text to be placed in the rail system
@@ -19,6 +18,7 @@ import javax.persistence.*;
 @Getter
 public class Label extends Component {
 	@Column(nullable = false)
+	@Setter
 	private String text;
 
 	public Label(RailSystem rs, Position position, String name, String text) {

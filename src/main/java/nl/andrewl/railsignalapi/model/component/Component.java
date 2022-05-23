@@ -39,6 +39,7 @@ public abstract class Component {
 	 * components in the rail system.
 	 */
 	@Column(nullable = false)
+	@Setter
 	private String name;
 
 	/**

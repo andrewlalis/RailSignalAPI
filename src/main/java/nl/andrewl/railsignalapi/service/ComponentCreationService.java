@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -59,7 +60,7 @@ public class ComponentCreationService {
 
 	private Component createSignal(RailSystem rs, SignalPayload payload) {
 		long segmentId = payload.segment.id;
-		Segment segment = segmentRepository.findById(segmentId)
+		Segment segment = segmentRepository.findByIdAndRailSystemId(segmentId, rs.getId())
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 		return new Signal(rs, payload.position, payload.name, segment);
 	}
@@ -70,7 +71,7 @@ public class ComponentCreationService {
 		for (var config : payload.possibleConfigurations) {
 			Set<PathNode> pathNodes = new HashSet<>();
 			for (var node : config.nodes) {
-				Component c = componentRepository.findById(node.id)
+				Component c = componentRepository.findByIdAndRailSystemId(node.id, rs.getId())
 						.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 				if (c instanceof PathNode pathNode) {
 					pathNodes.add(pathNode);
@@ -78,8 +79,11 @@ public class ComponentCreationService {
 					pathNode.getConnectedNodes().add(s);
 					componentRepository.save(pathNode);
 				} else {
-					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id " + node.id + " does not refer to a PathNode component.");
+					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id " + node.id + " does not refer to a valid path node.");
 				}
+			}
+			if (pathNodes.size() != 2) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid switch configuration. All switch configurations must connect 2 path nodes.");
 			}
 			s.getPossibleConfigurations().add(new SwitchConfiguration(s, pathNodes));
 		}
@@ -92,13 +96,33 @@ public class ComponentCreationService {
 	private Component createSegmentBoundary(RailSystem rs, SegmentBoundaryPayload payload) {
 		Set<Segment> segments = new HashSet<>();
 		for (var segmentP : payload.segments) {
-			Segment segment = segmentRepository.findById(segmentP.id)
+			Segment segment = segmentRepository.findByIdAndRailSystemId(segmentP.id, rs.getId())
 					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 			segments.add(segment);
 		}
 		if (segments.size() < 1 || segments.size() > 2) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid number of segments.");
 		}
-		return new SegmentBoundaryNode(rs, payload.position, payload.name, new HashSet<>(), segments);
+
+		Set<PathNode> connectedNodes = new HashSet<>();
+		if (payload.connectedNodes != null) {
+			for (var nodeData : payload.connectedNodes) {
+				var component = componentRepository.findByIdAndRailSystemId(nodeData.id, rs.getId())
+						.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid path node: " + nodeData.id));
+				if (component instanceof PathNode pathNode) {
+					connectedNodes.add(pathNode);
+				} else {
+					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid path node: " + nodeData.id);
+				}
+			}
+		}
+
+		var segmentBoundary = new SegmentBoundaryNode(rs, payload.position, payload.name, connectedNodes, segments);
+		segmentBoundary = componentRepository.save(segmentBoundary);
+		for (var connectedNode : connectedNodes) {
+			connectedNode.getConnectedNodes().add(segmentBoundary);
+			componentRepository.save(connectedNode);
+		}
+		return segmentBoundary;
 	}
 }

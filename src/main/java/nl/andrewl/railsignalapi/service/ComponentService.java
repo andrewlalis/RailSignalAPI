@@ -3,10 +3,11 @@ package nl.andrewl.railsignalapi.service;
 import lombok.RequiredArgsConstructor;
 import nl.andrewl.railsignalapi.dao.ComponentRepository;
 import nl.andrewl.railsignalapi.dao.RailSystemRepository;
+import nl.andrewl.railsignalapi.dao.SegmentRepository;
 import nl.andrewl.railsignalapi.dao.SwitchConfigurationRepository;
-import nl.andrewl.railsignalapi.model.component.Component;
-import nl.andrewl.railsignalapi.model.component.PathNode;
-import nl.andrewl.railsignalapi.rest.dto.PathNodeUpdatePayload;
+import nl.andrewl.railsignalapi.model.Segment;
+import nl.andrewl.railsignalapi.model.component.*;
+import nl.andrewl.railsignalapi.rest.dto.component.in.*;
 import nl.andrewl.railsignalapi.rest.dto.component.out.ComponentResponse;
 import nl.andrewl.railsignalapi.rest.dto.component.out.SimpleComponentResponse;
 import org.springframework.data.domain.Page;
@@ -28,6 +29,7 @@ public class ComponentService {
 	private final ComponentRepository<Component> componentRepository;
 	private final RailSystemRepository railSystemRepository;
 	private final SwitchConfigurationRepository switchConfigurationRepository;
+	private final SegmentRepository segmentRepository;
 
 	@Transactional(readOnly = true)
 	public List<ComponentResponse> getComponents(long rsId) {
@@ -72,38 +74,113 @@ public class ComponentService {
 	}
 
 	@Transactional
-	public ComponentResponse updatePath(long rsId, long cId, PathNodeUpdatePayload payload) {
-		var c = componentRepository.findByIdAndRailSystemId(cId, rsId)
+	public ComponentResponse updateComponent(long rsId, long componentId, ComponentPayload payload) {
+		var c = componentRepository.findByIdAndRailSystemId(componentId, rsId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-		if (!(c instanceof PathNode p)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Component is not a PathNode.");
-		Set<PathNode> newNodes = new HashSet<>();
-		for (var nodeObj : payload.connectedNodes) {
-			long id = nodeObj.id;
-			var c1 = componentRepository.findByIdAndRailSystemId(id, rsId);
-			if (c1.isPresent() && c1.get() instanceof PathNode pn) {
-				newNodes.add(pn);
-			} else {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Component with id " + id + " is not a PathNode in the same rail system.");
+		if (!c.getType().name().equalsIgnoreCase(payload.type)) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot update a component's type. Remove and create a new component instead.");
+		}
+		if (!c.getName().equals(payload.name) && componentRepository.existsByNameAndRailSystemId(payload.name, rsId)) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot rename component because another component has that name.");
+		}
+		c.setName(payload.name);
+		c.getPosition().setX(payload.position.getX());
+		c.getPosition().setY(payload.position.getY());
+		c.getPosition().setZ(payload.position.getZ());
+		if (c instanceof Signal s && payload instanceof SignalPayload sp) {
+			updateSignal(s, sp, rsId);
+		}
+		if (c instanceof SegmentBoundaryNode sb && payload instanceof SegmentBoundaryPayload sbp) {
+			updateSegmentBoundary(sb, sbp, rsId);
+		}
+		if (c instanceof Label lbl && payload instanceof LabelPayload lp) {
+			lbl.setText(lp.text);
+		}
+		if (c instanceof Switch sw && payload instanceof SwitchPayload sp) {
+			updateSwitch(sw, sp, rsId);
+		}
+		return ComponentResponse.of(componentRepository.save(c));
+	}
+
+	private void updateSignal(Signal s, SignalPayload sp, long rsId) {
+		Segment segment = segmentRepository.findByIdAndRailSystemId(sp.segment.id, rsId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Signal's attached segment with id " + sp.segment.id + " is invalid."));
+		s.setSegment(segment);
+	}
+
+	private void updateSegmentBoundary(SegmentBoundaryNode sb, SegmentBoundaryPayload sbp, long rsId) {
+		Set<Segment> newSegments = new HashSet<>();
+		for (var segData : sbp.segments) {
+			newSegments.add(segmentRepository.findByIdAndRailSystemId(segData.id, rsId)
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Segment boundary's attached segment with id " + segData.id + " is invalid.")));
+		}
+		sb.getSegments().retainAll(newSegments);
+		sb.getSegments().addAll(newSegments);
+
+		if (sbp.connectedNodes != null) {
+			Set<PathNode> connectedNodes = new HashSet<>();
+			for (var nodeData : sbp.connectedNodes) {
+				var component = componentRepository.findByIdAndRailSystemId(nodeData.id, rsId)
+						.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid path node: " + nodeData.id));
+				if (component instanceof PathNode pathNode && !component.equals(sb)) {
+					connectedNodes.add(pathNode);
+				} else {
+					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid path node: " + nodeData.id);
+				}
 			}
+			updateConnectedNodes(sb, connectedNodes);
+		}
+	}
+
+	private void updateSwitch(Switch sw, SwitchPayload sp, long rsId) {
+		Set<SwitchConfiguration> newConfigs = new HashSet<>();
+		Set<PathNode> connectedNodes = new HashSet<>();
+		for (var configData : sp.possibleConfigurations) {
+			Set<PathNode> nodes = new HashSet<>();
+			for (var nodeData : configData.nodes) {
+				var component = componentRepository.findByIdAndRailSystemId(nodeData.id, rsId)
+						.orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid path node id: " + nodeData.id));
+				if (component instanceof PathNode pathNode && !pathNode.getId().equals(sw.getId())) {
+					nodes.add(pathNode);
+					connectedNodes.add(pathNode);
+				} else {
+					throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid path node: " + nodeData.id);
+				}
+			}
+			if (nodes.size() != 2) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Switch configuration doesn't have required 2 path nodes.");
+			}
+			newConfigs.add(new SwitchConfiguration(sw, nodes));
+		}
+		if (newConfigs.isEmpty()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There must be at least one switch configuration.");
 		}
 
-		Set<PathNode> nodesToRemove = new HashSet<>(p.getConnectedNodes());
-		nodesToRemove.removeAll(newNodes);
+		sw.getPossibleConfigurations().retainAll(newConfigs);
+		sw.getPossibleConfigurations().addAll(newConfigs);
 
-		Set<PathNode> nodesToAdd = new HashSet<>(newNodes);
-		nodesToAdd.removeAll(p.getConnectedNodes());
+		// A switch's connectedNodes are derived from its set of possible configurations.
+		// So now we need to update all connected nodes to match the set of configurations.
+		updateConnectedNodes(sw, connectedNodes);
+	}
 
-		p.getConnectedNodes().removeAll(nodesToRemove);
-		p.getConnectedNodes().addAll(nodesToAdd);
-		for (var node : nodesToRemove) {
-			node.getConnectedNodes().remove(p);
+	private void updateConnectedNodes(PathNode owner, Set<PathNode> newNodes) {
+		Set<PathNode> disconnected = new HashSet<>(owner.getConnectedNodes());
+		disconnected.removeAll(newNodes);
+
+		Set<PathNode> connected = new HashSet<>(newNodes);
+		connected.removeAll(owner.getConnectedNodes());
+
+		owner.getConnectedNodes().retainAll(newNodes);
+		owner.getConnectedNodes().addAll(newNodes);
+
+		for (var node : disconnected) {
+			node.getConnectedNodes().remove(owner);
+			componentRepository.save(node);
 		}
-		for (var node : nodesToAdd) {
-			node.getConnectedNodes().add(p);
+		for (var node : connected) {
+			node.getConnectedNodes().add(owner);
+			componentRepository.save(node);
 		}
-		componentRepository.saveAll(nodesToRemove);
-		componentRepository.saveAll(nodesToAdd);
-		p = componentRepository.save(p);
-		return ComponentResponse.of(p);
 	}
 }
