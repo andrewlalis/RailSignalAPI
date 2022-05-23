@@ -1,12 +1,6 @@
 <template>
   <q-list>
-    <q-expansion-item
-      expand-separator
-      label="Component Links"
-      caption="Link components to your system."
-    >
-      <link-tokens-view :rail-system="railSystem"/>
-    </q-expansion-item>
+    <link-tokens-view :rail-system="railSystem"/>
   </q-list>
 </template>
 

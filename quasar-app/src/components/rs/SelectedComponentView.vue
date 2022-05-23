@@ -25,7 +25,7 @@
         id="signalInfo"
         label="Signal Information"
         v-if="component.type === 'SIGNAL'"
-        content-inset-level="0.5"
+        :content-inset-level="0.5"
         switch-toggle-side
         expand-separator
       >
@@ -38,7 +38,7 @@
       <q-expansion-item
         label="Connected Nodes"
         v-if="component.connectedNodes !== undefined && component.connectedNodes !== null"
-        content-inset-level="0.5"
+        :content-inset-level="0.5"
         switch-toggle-side
         expand-separator
         class="q-gutter-md"
@@ -63,7 +63,7 @@
       <q-expansion-item
         label="Connected Segments"
         v-if="component.type === 'SEGMENT_BOUNDARY'"
-        content-inset-level="0.5"
+        :content-inset-level="0.5"
         switch-toggle-side
         expand-separator
       >
@@ -76,7 +76,7 @@
       <q-expansion-item
         label="Switch Information"
         v-if="component.type === 'SWITCH'"
-        content-inset-level="0.5"
+        :content-inset-level="0.5"
         switch-toggle-side
         expand-separator
       >
@@ -86,14 +86,16 @@
             :key="config.id"
           >
             <q-item-section>
-              <q-item-label class="q-gutter-md">
-                <q-btn
+              <q-item-label class="q-gutter-sm">
+                <q-chip
                   v-for="node in config.nodes"
                   :key="node.id"
                   dense
                   size="sm"
                   :label="node.name"
                   :color="component.activeConfiguration && component.activeConfiguration.id === config.id ? 'primary' : 'secondary'"
+                  :text-color="'white'"
+                  clickable
                   @click="select(node)"
                 />
               </q-item-label>

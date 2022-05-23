@@ -5,7 +5,6 @@
   >
     <q-item-section>
       <q-item-label>{{railSystem.name}}</q-item-label>
-      <q-item-label caption>Id: {{railSystem.id}}</q-item-label>
     </q-item-section>
   </q-item>
 </template>

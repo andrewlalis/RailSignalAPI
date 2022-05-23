@@ -16,19 +16,19 @@
   </div>
   <q-page-sticky position="bottom-right" :offset="[25, 25]">
     <q-fab icon="add" direction="up" color="accent">
-      <q-fab-action @click="addSignalDialog = true">
+      <q-fab-action @click="addSignalData.toggle = true">
         <q-icon><img src="~assets/icons/signal_icon.svg"/></q-icon>
         <q-tooltip>Add Signal</q-tooltip>
       </q-fab-action>
-      <q-fab-action @click="addSegmentBoundaryDialog = true">
+      <q-fab-action @click="addSegmentBoundaryData.toggle = true">
         <q-icon><img src="~assets/icons/segment-boundary_icon.svg"/></q-icon>
         <q-tooltip>Add Segment Boundary</q-tooltip>
       </q-fab-action>
-      <q-fab-action @click="addSwitchDialog = true">
+      <q-fab-action @click="addSwitchData.toggle = true">
         <q-icon><img src="~assets/icons/switch_icon.svg"/></q-icon>
         <q-tooltip>Add Switch</q-tooltip>
       </q-fab-action>
-      <q-fab-action @click="addLabelDialog = true">
+      <q-fab-action @click="addLabelData.toggle = true">
         <q-icon><img src="~assets/icons/label_icon.svg"/></q-icon>
         <q-tooltip>Add Label</q-tooltip>
       </q-fab-action>
@@ -36,174 +36,145 @@
   </q-page-sticky>
 
   <!-- Add Signal Dialog -->
-  <q-dialog v-model="addSignalDialog" style="min-width: 400px" @hide="resetAll">
-    <q-card>
-      <q-form @submit="onAddSignalSubmit" @reset="resetAll">
-        <q-card-section>
-          <div class="text-h6">Add Signal</div>
-          <p>
-            Add a signal to the rail system.
-          </p>
-        </q-card-section>
-        <q-card-section>
-          <q-input
-            label="Name"
-            type="text"
-            v-model="addComponentData.name"
-          />
-          <div class="row">
-            <q-input
-              label="X"
-              type="number"
-              class="col-sm-4"
-              v-model="addComponentData.position.x"
-            />
-            <q-input
-              label="Y"
-              type="number"
-              class="col-sm-4"
-              v-model="addComponentData.position.y"
-            />
-            <q-input
-              label="Z"
-              type="number"
-              class="col-sm-4"
-              v-model="addComponentData.position.z"
-            />
-          </div>
-        </q-card-section>
-        <q-card-section>
-          <q-select
-            v-model="addSignalData.segment"
-            :options="railSystem.segments"
-            option-value="id"
-            option-label="name"
-            label="Segment"
-          />
-        </q-card-section>
-        <q-card-actions align="right" class="text-primary">
-          <q-btn flat label="Cancel" type="reset" @click="addSignalDialog = false"/>
-          <q-btn flat label="Add Signal" type="submit"/>
-        </q-card-actions>
-      </q-form>
-    </q-card>
-  </q-dialog>
+  <add-component-dialog
+    v-model="addSignalData"
+    type="SIGNAL"
+    :rail-system="railSystem"
+    title="Add Signal"
+    success-message="Signal added."
+  >
+    <template #subtitle>
+      <p>
+        Add a signal to the rail system.
+      </p>
+    </template>
+    <template #default>
+      <q-card-section>
+        <q-select
+          v-model="addSignalData.segment"
+          :options="railSystem.segments"
+          option-value="id"
+          option-label="name"
+          label="Segment"
+        />
+      </q-card-section>
+    </template>
+  </add-component-dialog>
 
   <!-- Add Segment boundary -->
-  <q-dialog v-model="addSegmentBoundaryDialog" style="min-width: 400px" @hide="resetAll">
-    <q-card>
-      <q-form @submit="onAddSegmentBoundarySubmit" @reset="resetAll">
-        <q-card-section>
-          <div class="text-h6">Add Segment Boundary</div>
-          <p>
-            Add a segment boundary to the rail system. A segment boundary is a
-            point where a train can cross between two segments, or "blocks" in
-            the system. For example, a train may move from a junction segment to
-            a main line. This boundary is a place where a detector component can
-            update the system as trains pass.
-          </p>
-        </q-card-section>
-        <q-card-section>
-          <q-input
-            label="Name"
-            type="text"
-            v-model="addComponentData.name"
-          />
-          <div class="row">
-            <q-input
-              label="X"
-              type="number"
-              class="col-sm-4"
-              v-model="addComponentData.position.x"
-            />
-            <q-input
-              label="Y"
-              type="number"
-              class="col-sm-4"
-              v-model="addComponentData.position.y"
-            />
-            <q-input
-              label="Z"
-              type="number"
-              class="col-sm-4"
-              v-model="addComponentData.position.z"
-            />
-          </div>
-        </q-card-section>
-        <q-card-section>
-          <q-select
-            v-model="addSegmentBoundaryData.segments"
-            :options="railSystem.segments"
-            multiple
-            option-value="id"
-            option-label="name"
-            label="Segments"
-          />
-        </q-card-section>
-        <q-card-actions align="right" class="text-primary">
-          <q-btn flat label="Cancel" type="reset" @click="addSegmentBoundaryDialog = false"/>
-          <q-btn flat label="Add Segment Boundary" type="submit"/>
-        </q-card-actions>
-      </q-form>
-    </q-card>
-  </q-dialog>
+  <add-component-dialog
+    title="Add Segment Boundary"
+    success-message="Segment boundary added."
+    :rail-system="railSystem"
+    type="SEGMENT_BOUNDARY"
+    v-model="addSegmentBoundaryData"
+  >
+    <template #subtitle>
+      <p>
+        Add a segment boundary to the rail system.
+      </p>
+    </template>
+    <template #default>
+      <q-card-section>
+        <q-select
+          v-model="addSegmentBoundaryData.segments"
+          :options="railSystem.segments"
+          multiple
+          :option-value="segment => segment"
+          :option-label="segment => segment.name"
+          label="Segments"
+        />
+      </q-card-section>
+    </template>
+  </add-component-dialog>
 
   <!-- Add Switch dialog -->
-  <q-dialog v-model="addSwitchDialog" @hide="resetAll"></q-dialog>
+  <add-component-dialog
+    title="Add Switch"
+    success-message="Switch added."
+    :rail-system="railSystem"
+    type="SWITCH"
+    v-model="addSwitchData"
+  >
+    <template #subtitle>
+      <p>
+        Add a switch to the rail system.
+      </p>
+    </template>
+    <template #default>
+      <q-card-section>
+        <div class="row">
+          <q-list>
+            <q-item
+              v-for="config in addSwitchData.possibleConfigurations"
+              :key="config.key"
+            >
+              <q-item-section>
+                <q-item-label>
+                  <q-chip
+                    v-for="node in config.nodes"
+                    :key="node.id"
+                    :label="node.name"
+                  />
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
 
-  <!-- Add Label dialog -->
-  <q-dialog v-model="addLabelDialog" style="min-width: 400px" @hide="resetAll">
-    <q-card>
-      <q-form @submit="onAddLabelSubmit" @reset="resetAll">
-        <q-card-section>
-          <div class="text-h6">Add Label</div>
-          <p>
-            Add a label to the rail system as a piece of text on the map. Labels
-            are purely a visual component, and do not interact with the system
-            in any way, besides being a helpful point of reference for users.
-          </p>
-        </q-card-section>
-        <q-card-section>
-          <q-input
-            label="Name"
-            type="text"
-            v-model="addComponentData.name"
-          />
-          <div class="row">
-            <q-input
-              label="X"
-              type="number"
-              class="col-sm-4"
-              v-model="addComponentData.position.x"
-            />
-            <q-input
-              label="Y"
-              type="number"
-              class="col-sm-4"
-              v-model="addComponentData.position.y"
-            />
-            <q-input
-              label="Z"
-              type="number"
-              class="col-sm-4"
-              v-model="addComponentData.position.z"
+        <div class="row">
+          <div class="col-sm-6">
+            <q-select
+              v-model="addSwitchData.pathNode1"
+              :options="getEligibleSwitchNodes()"
+              :option-value="segment => segment"
+              :option-label="segment => segment.name"
+              label="First Path Node"
             />
           </div>
-        </q-card-section>
-        <q-card-section>
-          <q-input
-            label="Label Text"
-            type="text"
-            v-model="addLabelData.text"
-          />
-        </q-card-section>
-        <q-card-actions align="right" class="text-primary">
-          <q-btn flat label="Cancel" type="reset" @click="addLabelDialog = false"/>
-          <q-btn flat label="Add Label" type="submit"/>
-        </q-card-actions>
-      </q-form>
-    </q-card>
-  </q-dialog>
+          <div class="col-sm-6">
+            <q-select
+              v-model="addSwitchData.pathNode2"
+              :options="getEligibleSwitchNodes()"
+              :option-value="segment => segment"
+              :option-label="segment => segment.name"
+              label="Second Path Node"
+            />
+          </div>
+        </div>
+        <div class="row">
+          <q-btn label="Add Configuration" color="primary" @click="addSwitchConfiguration"/>
+        </div>
+
+      </q-card-section>
+    </template>
+  </add-component-dialog>
+
+  <!-- Add Label dialog -->
+  <add-component-dialog
+    title="Add Label"
+    success-message="Added label."
+    :rail-system="railSystem"
+    type="LABEL"
+    v-model="addLabelData"
+  >
+    <template #subtitle>
+      <p>
+        Add a label to the rail system as a piece of text on the map. Labels
+        are purely a visual component, and do not interact with the system
+        in any way, besides being a helpful point of reference for users.
+      </p>
+    </template>
+    <template #default>
+      <q-card-section>
+        <q-input
+          label="Label Text"
+          type="text"
+          v-model="addLabelData.text"
+        />
+      </q-card-section>
+    </template>
+  </add-component-dialog>
 </template>
 
 <script>
@@ -212,10 +183,11 @@ import { draw, initMap } from "src/render/mapRenderer";
 import SelectedComponentView from "components/rs/SelectedComponentView.vue";
 import { useQuasar } from "quasar";
 import { createComponent } from "src/api/components";
+import AddComponentDialog from "components/rs/add_component/AddComponentDialog.vue";
 
 export default {
   name: "MapView",
-  components: { SelectedComponentView },
+  components: { AddComponentDialog, SelectedComponentView },
   setup() {
     const quasar = useQuasar();
     return {quasar};
@@ -228,23 +200,39 @@ export default {
   },
   data() {
     return {
-      addSignalDialog: false,
-      addSegmentBoundaryDialog: false,
-      addSwitchDialog: false,
-      addLabelDialog: false,
-      addComponentData: {
+      addSignalData: {
         name: "",
         position: {
           x: 0, y: 0, z: 0
-        }
-      },
-      addSignalData: {
-        segment: null
+        },
+        segment: null,
+        toggle: false
       },
       addSegmentBoundaryData: {
-        segments: []
+        name: "",
+        position: {
+          x: 0, y: 0, z: 0
+        },
+        toggle: false,
+        segments: [],
+        connectedNodes: []
+      },
+      addSwitchData: {
+        name: "",
+        position: {
+          x: 0, y: 0, z: 0
+        },
+        toggle: false,
+        possibleConfigurations: [],
+        // Utility properties for the UI for adding configurations.
+        pathNode1: null,
+        pathNode2: null
       },
       addLabelData: {
+        position: {
+          x: 0, y: 0, z: 0
+        },
+        toggle: false,
         text: ""
       }
     }
@@ -264,50 +252,38 @@ export default {
     }
   },
   methods: {
-    onAddSignalSubmit() {
-      const data = {...this.addComponentData, ...this.addSignalData};
-      data.type = "SIGNAL";
-      this.attemptCreateComponent(data, "Signal added.", () => this.addSignalDialog = false);
+    getEligibleSwitchNodes() {
+      return this.railSystem.components.filter(component => {
+        return component.connectedNodes !== undefined && component.connectedNodes !== null;
+      });
     },
-    onAddSegmentBoundarySubmit() {
-      const data = {...this.addComponentData, ...this.addSegmentBoundaryData};
-      data.type = "SEGMENT_BOUNDARY";
-      this.attemptCreateComponent(data, "Segment boundary added.", () => this.addSegmentBoundaryDialog = false);
-    },
-    segmentBoundarySegmentsValid() {
-      const set = new Set(this.addSegmentBoundaryData.segments);
-      return set.size === 2 && set.size === this.addSegmentBoundaryData.segments.length;
-    },
-    onAddLabelSubmit() {
-      const data = {...this.addComponentData, ...this.addLabelData};
-      data.type = "LABEL";
-      this.attemptCreateComponent(data, "Label added.", () => this.addLabelDialog = false);
-    },
-    resetAll() {
-      this.addComponentData.name = "";
-      this.addComponentData.position.x = 0;
-      this.addComponentData.position.y = 0;
-      this.addComponentData.position.z = 0;
-      this.addSignalDialog.segment = null;
-      this.addSegmentBoundaryData.segments = [];
-      this.addLabelData.text = "";
-    },
-    attemptCreateComponent(data, successMessage, successHandler) {
-      createComponent(this.railSystem, data)
-        .then(() => {
-          this.quasar.notify({
-            color: "positive",
-            message: successMessage
-          });
-          successHandler();
+    addSwitchConfiguration() {
+      if (
+        this.addSwitchData.pathNode1 === null ||
+        this.addSwitchData.pathNode2 === null ||
+        this.addSwitchData.pathNode1.id === this.addSwitchData.pathNode2.id ||
+        this.addSwitchData.possibleConfigurations.some(config => {
+          // Check if there's already a configuration containing both of these nodes.
+          return config.nodes.every(node =>
+            node.id === this.addSwitchData.pathNode1.id ||
+            node.id === this.addSwitchData.pathNode2.id);
         })
-        .catch(error => {
-          console.log(error);
-          this.quasar.notify({
-            color: "negative",
-            message: "An error occurred: " + error.response.data.message
-          });
+      ) {
+        this.quasar.notify({
+          color: "warning",
+          message: "Invalid switch configuration."
         });
+        return;
+      }
+      // All good!
+      this.addSwitchData.possibleConfigurations.push({
+        nodes: [
+          this.addSwitchData.pathNode1,
+          this.addSwitchData.pathNode2
+        ],
+        // A unique key, just for the frontend to use. This is not used by the API.
+        key: this.addSwitchData.pathNode1.id + "_" + this.addSwitchData.pathNode2.id
+      });
     }
   }
 };

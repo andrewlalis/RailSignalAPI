@@ -40,7 +40,9 @@ export default {
   data() {
     return {
       panel: "map",
-      railSystem: null
+      railSystem: null,
+
+      linkTokens: []
     }
   },
   async beforeRouteEnter(to, from, next) {

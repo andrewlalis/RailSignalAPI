@@ -30,7 +30,7 @@ export function getLinkTokens(rs) {
 /**
  * Creates a new link token.
  * @param {RailSystem} rs
- * @param {LinkToken} data
+ * @param {{label: String, componentIds: Number[]}} data
  * @return {Promise<string>} A promise that resolves to the token that was created.
  */
 export function createLinkToken(rs, data) {
