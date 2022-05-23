@@ -17,7 +17,7 @@ export class LinkToken {
  * @param {RailSystem} rs
  * @return {Promise<LinkToken[]>}
  */
-export function getTokens(rs) {
+export function getLinkTokens(rs) {
     return new Promise((resolve, reject) => {
         axios.get(`${API_URL}/rs/${rs.id}/lt`)
             .then(response => {

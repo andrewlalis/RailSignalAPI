@@ -10,7 +10,7 @@ export class RailSystem {
         this.segments = [];
         this.components = [];
         this.websocket = null;
-        this.selectedComponent = null;
+        this.selectedComponents = [];
     }
 }
 

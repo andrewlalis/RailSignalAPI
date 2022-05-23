@@ -30,27 +30,18 @@
         expand-separator
       >
         <q-list>
-          <q-item
-            v-for="segment in [component.segment]"
-            :key="segment.id"
-            clickable
-            v-ripple
-          >
-            <q-item-section>
-              <q-item-label>Linked to segment: {{segment.name}}</q-item-label>
-              <q-item-label caption>Id: {{segment.id}}</q-item-label>
-            </q-item-section>
-          </q-item>
+          <segment-list-item v-for="segment in [component.segment]" :key="segment.id" :segment="segment" />
         </q-list>
       </q-expansion-item>
 
       <!-- Path node info -->
       <q-expansion-item
-        label="Path Node Information"
+        label="Connected Nodes"
         v-if="component.connectedNodes !== undefined && component.connectedNodes !== null"
         content-inset-level="0.5"
         switch-toggle-side
         expand-separator
+        class="q-gutter-md"
       >
         <q-list>
           <q-item
@@ -70,24 +61,14 @@
 
       <!-- Segment boundary info -->
       <q-expansion-item
-        label="Segment Boundary Information"
+        label="Connected Segments"
         v-if="component.type === 'SEGMENT_BOUNDARY'"
         content-inset-level="0.5"
         switch-toggle-side
         expand-separator
       >
         <q-list>
-          <q-item
-            v-for="segment in component.segments"
-            :key="segment.id"
-            clickable
-            v-ripple
-          >
-            <q-item-section>
-              <q-item-label>{{segment.name}}</q-item-label>
-              <q-item-label caption>Id: {{segment.id}}</q-item-label>
-            </q-item-section>
-          </q-item>
+          <segment-list-item v-for="segment in component.segments" :key="segment.id" :segment="segment"/>
         </q-list>
       </q-expansion-item>
 
@@ -120,6 +101,12 @@
           </q-item>
         </q-list>
       </q-expansion-item>
+
+      <q-item>
+        <q-item-section side>
+          <q-btn color="warning" label="Remove" size="sm" @click="remove(component)"/>
+        </q-item-section>
+      </q-item>
     </q-list>
   </div>
 </template>
@@ -127,16 +114,25 @@
 <script>
 import { RailSystem } from "src/api/railSystems";
 import { useRailSystemsStore } from "stores/railSystemsStore";
+import SegmentListItem from "components/rs/SegmentListItem.vue";
+import { useQuasar } from "quasar";
+import { removeComponent } from "src/api/components";
 
 export default {
   name: "SelectedComponentView",
+  components: { SegmentListItem },
   setup() {
     const rsStore = useRailSystemsStore();
-    return {rsStore};
+    const quasar = useQuasar();
+    return {rsStore, quasar};
   },
   props: {
     component: {
       type: Object,
+      required: true
+    },
+    railSystem: {
+      type: RailSystem,
       required: true
     }
   },
@@ -144,8 +140,30 @@ export default {
     select(component) {
       const c = this.rsStore.selectedRailSystem.components.find(cp => cp.id === component.id);
       if (c) {
-        this.rsStore.selectedRailSystem.selectedComponent = c;
+        this.rsStore.selectedRailSystem.selectedComponents.length = 0;
+        this.rsStore.selectedRailSystem.selectedComponents.push(c);
       }
+    },
+    remove(component) {
+      this.quasar.dialog({
+        title: "Confirm Removal",
+        message: "Are you sure you want to remove this component? This cannot be undone.",
+        cancel: true
+      }).onOk(() => {
+        removeComponent(this.railSystem, component.id)
+          .then(() => {
+            this.quasar.notify({
+              color: "positive",
+              message: "Component has been removed."
+            });
+          })
+          .catch(error => {
+            this.quasar.notify({
+              color: "negative",
+              message: "An error occurred: " + error.response.data.message
+            });
+          });
+      });
     }
   }
 };

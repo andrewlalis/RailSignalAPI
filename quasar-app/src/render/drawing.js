@@ -19,6 +19,8 @@ export function drawComponent(ctx, worldTx, component) {
         drawSegmentBoundary(ctx, component);
     } else if (component.type === "SWITCH") {
         drawSwitch(ctx, component);
+    } else if (component.type === "LABEL") {
+      drawLabel(ctx, component);
     }
 
     ctx.setTransform(tx.translate(0.75, -0.75));
@@ -97,6 +99,15 @@ function drawSwitch(ctx, sw) {
     ctx.moveTo(0, 0);
     ctx.lineTo(-0.3, -0.3);
     ctx.stroke();
+}
+
+function drawLabel(ctx, lbl) {
+  ctx.fillStyle = "black";
+  circle(ctx, 0, 0, 0.1);
+  ctx.fill();
+  ctx.strokeStyle = "black";
+  ctx.font = "0.5px Sans-Serif";
+  ctx.fillText(lbl.text, 0.1, -0.2);
 }
 
 function drawOnlineIndicator(ctx, component) {

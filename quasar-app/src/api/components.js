@@ -5,17 +5,14 @@ export function refreshComponents(rs) {
     return new Promise((resolve, reject) => {
         axios.get(`${API_URL}/rs/${rs.id}/c`)
             .then(response => {
-                const previousSelectedComponentId = rs.selectedComponent ? rs.selectedComponent.id : null;
+                const previousSelectedComponentIds = rs.selectedComponents.map(c => c.id);
+                rs.selectedComponents.length = 0;
                 rs.components = response.data;
-                if (previousSelectedComponentId !== null) {
-                    const previousComponent = rs.components.find(c => c.id === previousSelectedComponentId);
-                    if (previousComponent) {
-                        rs.selectedComponent = previousComponent;
-                    } else {
-                        rs.selectedComponent = null;
-                    }
-                } else {
-                    rs.selectedComponent = null;
+                for (let i = 0; i < previousSelectedComponentIds.length; i++) {
+                  const component = rs.components.find(c => c.id === previousSelectedComponentIds[i]);
+                  if (component) {
+                    rs.selectedComponents.push(component);
+                  }
                 }
                 resolve();
             })
@@ -42,7 +39,7 @@ export function refreshSomeComponents(rs, components) {
 
 export function getComponent(rs, id) {
     return new Promise((resolve, reject) => {
-        axios.get(`${this.apiUrl}/rs/${rs.id}/c/${id}`)
+        axios.get(`${API_URL}/rs/${rs.id}/c/${id}`)
             .then(response => resolve(response.data))
             .catch(reject);
     });
@@ -78,7 +75,8 @@ export function createComponent(rs, data) {
                     .then(() => {
                         const newComponent = rs.components.find(c => c.id === newComponentId);
                         if (newComponent) {
-                            rs.selectedComponent = newComponent;
+                          rs.selectedComponents.length = 0;
+                          rs.selectedComponents.push(newComponent);
                         }
                         resolve();
                     })

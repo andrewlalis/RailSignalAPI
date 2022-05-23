@@ -147,14 +147,11 @@ function getWorldTransform() {
 }
 
 export function isComponentHovered(component) {
-    for (let i = 0; i < hoveredElements.length; i++) {
-        if (hoveredElements[i].id === component.id) return true;
-    }
-    return false;
+  return hoveredElements.some(c => c.id === component.id);
 }
 
 export function isComponentSelected(component) {
-  return railSystem.selectedComponent !== null && railSystem.selectedComponent.id === component.id;
+  return railSystem.selectedComponents.some(c => c.id === component.id);
 }
 
 /**
@@ -209,10 +206,11 @@ function onMouseUp() {
         mapTranslation.y += mapDragTranslation.y;
         finishedDrag = true;
     }
-    if (hoveredElements.length === 1) {
-        railSystem.selectedComponent = hoveredElements[0];
+    if (hoveredElements.length > 0) {
+      railSystem.selectedComponents.length = 0;
+      railSystem.selectedComponents.push(...hoveredElements);
     } else if (!finishedDrag) {
-        railSystem.selectedComponent = null;
+      railSystem.selectedComponents.length = 0;
     }
     mapDragOrigin = null;
     mapDragTranslation = null;

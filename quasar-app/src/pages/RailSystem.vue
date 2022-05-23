@@ -9,7 +9,6 @@
       >
         <q-tab name="map" label="Map"/>
         <q-tab name="segments" label="Segments"/>
-        <q-tab name="components" label="Components"/>
         <q-tab name="settings" label="Settings"/>
       </q-tabs>
       <q-tab-panels v-model="panel">
@@ -18,9 +17,6 @@
         </q-tab-panel>
         <q-tab-panel name="segments">
           <segments-view :rail-system="railSystem"/>
-        </q-tab-panel>
-        <q-tab-panel name="components">
-          <components-view :rail-system="railSystem"/>
         </q-tab-panel>
         <q-tab-panel name="settings">
           <settings-view :rail-system="railSystem"/>
@@ -36,12 +32,11 @@
 import { useRailSystemsStore } from "stores/railSystemsStore";
 import MapView from "components/rs/MapView.vue";
 import SegmentsView from "components/rs/SegmentsView.vue";
-import ComponentsView from "components/rs/ComponentsView.vue";
 import SettingsView from "components/rs/SettingsView.vue";
 
 export default {
   name: "RailSystemPage",
-  components: { SettingsView, ComponentsView, SegmentsView, MapView },
+  components: { SettingsView, SegmentsView, MapView },
   data() {
     return {
       panel: "map",
