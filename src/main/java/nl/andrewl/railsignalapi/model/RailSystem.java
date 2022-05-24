@@ -1,19 +1,18 @@
 package nl.andrewl.railsignalapi.model;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 /**
  * Represents a closed system that contains a collection of components.
  */
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RailSystem {
 	@Id
 	@GeneratedValue
@@ -24,6 +23,11 @@ public class RailSystem {
 	 */
 	@Column(nullable = false, unique = true)
 	private String name;
+
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	@PrimaryKeyJoinColumn
+	@Setter
+	private RailSystemSettings settings;
 
 	public RailSystem(String name) {
 		this.name = name;

@@ -13,19 +13,21 @@ module build_system;
 import dsh;
 
 const DIST = "./src/main/resources/app";
+const DIST_ORIGIN = "./quasar-app/dist/spa";
+const APP_BUILD = "quasar build -m spa";
 
 void main(string[] args) {
     print("Building RailSignalAPI");
-    chdir("railsignal-app");
+    chdir("quasar-app");
     print("Building app...");
-    runOrQuit("npm run build");
-    print("Copying dist to %s", DIST);
+    runOrQuit(APP_BUILD);
+    print("Copying dist from %s to %s", DIST_ORIGIN, DIST);
     chdir("..");
     removeIfExists(DIST);
     mkdir(DIST);
-    copyDir("railsignal-app/dist", DIST);
+    copyDir(DIST_ORIGIN, DIST);
     print("Building API...");
-    runOrQuit("mvn clean package spring-boot:repackage");
+    runOrQuit("mvn clean package spring-boot:repackage -DskipTests=true");
     print("Build complete!");
 
     if (args.length > 1 && args[1] == "run") {
