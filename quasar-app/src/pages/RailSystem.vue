@@ -45,17 +45,19 @@ export default {
       linkTokens: []
     }
   },
-  async beforeRouteEnter(to, from, next) {
+  beforeRouteEnter(to, from, next) {
     const id = parseInt(to.params.id);
     const rsStore = useRailSystemsStore();
-    await rsStore.selectRailSystem(id);
-    next(vm => vm.railSystem = rsStore.selectedRailSystem);
+    rsStore.selectRailSystem(id).then(() => {
+      next(vm => vm.railSystem = rsStore.selectedRailSystem);
+    });
   },
-  async beforeRouteUpdate(to, from) {
+  beforeRouteUpdate(to, from) {
     const id = parseInt(to.params.id);
     const rsStore = useRailSystemsStore();
-    await rsStore.selectRailSystem(id);
-    this.railSystem = rsStore.selectedRailSystem;
+    rsStore.selectRailSystem(id).then(() => {
+      this.railSystem = rsStore.selectedRailSystem;
+    });
   }
 };
 </script>

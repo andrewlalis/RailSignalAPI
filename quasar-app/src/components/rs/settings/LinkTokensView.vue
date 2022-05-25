@@ -3,21 +3,32 @@
     expand-separator
     label="Component Links"
     caption="Link components to your system."
-    @before-show="refreshLinkTokens"
     switch-toggle-side
     :content-inset-level="0.5"
   >
     <q-list>
       <q-item
-        v-for="token in linkTokens"
+        v-for="token in railSystem.linkTokens"
         :key="token.id"
       >
         <q-item-section>
           <q-item-label>{{token.label}}</q-item-label>
           <q-item-label caption>{{token.id}}</q-item-label>
         </q-item-section>
+        <q-item-section>
+          <q-item-label caption>Components</q-item-label>
+          <q-item-label>
+            <q-chip
+              v-for="component in token.components"
+              :key="component.id"
+              :label="component.name"
+              dense
+              size="sm"
+            />
+          </q-item-label>
+        </q-item-section>
       </q-item>
-      <q-item v-if="linkTokens.length === 0">
+      <q-item v-if="railSystem.linkTokens.length === 0">
         <q-item-section>
           <q-item-label caption>There are no link tokens. Add one via the <em>Add Link</em> button below.</q-item-label>
         </q-item-section>
@@ -91,7 +102,7 @@
 
 <script>
 import { RailSystem } from "src/api/railSystems";
-import { createLinkToken, getLinkTokens } from "src/api/linkTokens";
+import { createLinkToken } from "src/api/linkTokens";
 import { useQuasar } from "quasar";
 
 export default {
@@ -108,7 +119,6 @@ export default {
   },
   data() {
     return {
-      linkTokens: [],
       addTokenDialog: false,
       addTokenData: {
         label: "",
@@ -119,12 +129,6 @@ export default {
     };
   },
   methods: {
-    refreshLinkTokens() {
-      getLinkTokens(this.railSystem)
-        .then(tokens => {
-          this.linkTokens = tokens;
-        });
-    },
     getEligibleComponents() {
       return this.railSystem.components.filter(component => {
         return component.type === "SIGNAL" || component.type === "SEGMENT_BOUNDARY" || component.type === "SWITCH";
@@ -144,7 +148,7 @@ export default {
         });
     },
     onReset() {
-      this.addTokenData.name = "";
+      this.addTokenData.label = "";
       this.addTokenData.selectedComponents.length = 0;
       this.addTokenData.componentIds.length = 0;
       this.token = null;

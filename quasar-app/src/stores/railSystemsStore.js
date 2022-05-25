@@ -1,8 +1,10 @@
-import {defineStore} from "pinia";
-import {refreshSegments} from "../api/segments"
-import {refreshComponents} from "../api/components";
-import {closeWebsocketConnection, establishWebsocketConnection} from "../api/websocket";
+import { defineStore } from "pinia";
+import { refreshSegments } from "../api/segments";
+import { refreshComponents } from "../api/components";
+import { closeWebsocketConnection, establishWebsocketConnection } from "../api/websocket";
 import { refreshRailSystems } from "src/api/railSystems";
+import { refreshLinkTokens } from "src/api/linkTokens";
+import { refreshSettings } from "src/api/settings";
 
 export const useRailSystemsStore = defineStore('RailSystemsStore', {
     state: () => ({
@@ -13,26 +15,38 @@ export const useRailSystemsStore = defineStore('RailSystemsStore', {
         /**
          * @type {RailSystem | null}
          */
-        selectedRailSystem: null,
-
-        loaded: false
+        selectedRailSystem: null
     }),
     actions: {
-      async selectRailSystem(rsId) {
-        if (!this.loaded) {
-          await refreshRailSystems(this);
+      /**
+       * Updates the selected rail system.
+       * @param rsId {Number} The new rail system id.
+       * @returns {Promise} A promise that resolves when the new rail system is
+       * fully loaded and ready.
+       */
+      selectRailSystem(rsId) {
+        // Close any existing websocket connections prior to refreshing.
+        const wsClosePromises = [];
+        if (this.selectedRailSystem) {
+          wsClosePromises.push(closeWebsocketConnection(this.selectedRailSystem));
         }
-        this.railSystems.forEach(r => {
-          r.components.length = 0;
-          r.segments.length = 0;
-          closeWebsocketConnection(r);
+        return new Promise(resolve => {
+          Promise.all(wsClosePromises).then(() => {
+            refreshRailSystems(this).then(() => {
+              const rs = this.railSystems.find(r => r.id === rsId);
+              const updatePromises = [];
+              updatePromises.push(refreshSegments(rs));
+              updatePromises.push(refreshComponents(rs));
+              updatePromises.push(refreshLinkTokens(rs));
+              updatePromises.push(refreshSettings(rs));
+              updatePromises.push(establishWebsocketConnection(rs));
+              Promise.all(updatePromises).then(() => {
+                this.selectedRailSystem = rs;
+                resolve();
+              });
+            });
+          });
         });
-        if (!rsId) return;
-        const rs = this.railSystems.find(r => r.id === rsId);
-        await refreshSegments(rs);
-        await refreshComponents(rs);
-        establishWebsocketConnection(rs);
-        this.selectedRailSystem = rs;
       }
     },
     getters: {

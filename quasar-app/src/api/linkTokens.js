@@ -13,19 +13,21 @@ export class LinkToken {
 }
 
 /**
- * Gets the list of link tokens in a rail system.
+ * Refreshes the list of link tokens in a rail system.
  * @param {RailSystem} rs
- * @return {Promise<LinkToken[]>}
+ * @return {Promise}
  */
-export function getLinkTokens(rs) {
-    return new Promise((resolve, reject) => {
-        axios.get(`${API_URL}/rs/${rs.id}/lt`)
-            .then(response => {
-                resolve(response.data.map(obj => new LinkToken(obj)));
-            })
-            .catch(reject);
-    });
+export function refreshLinkTokens(rs) {
+  return new Promise((resolve, reject) => {
+    axios.get(`${API_URL}/rs/${rs.id}/lt`)
+      .then(response => {
+        rs.linkTokens = response.data;
+        resolve();
+      })
+      .catch(reject);
+  });
 }
+
 
 /**
  * Creates a new link token.
@@ -34,13 +36,14 @@ export function getLinkTokens(rs) {
  * @return {Promise<string>} A promise that resolves to the token that was created.
  */
 export function createLinkToken(rs, data) {
-    return new Promise((resolve, reject) => {
-        axios.post(`${API_URL}/rs/${rs.id}/lt`, data)
-            .then(response => {
-                resolve(response.data.token);
-            })
-            .catch(reject);
-    });
+  return new Promise((resolve, reject) => {
+    axios.post(`${API_URL}/rs/${rs.id}/lt`, data)
+      .then(response => {
+        const token = response.data.token;
+        refreshLinkTokens(rs).then(() => resolve(token)).catch(reject);
+      })
+      .catch(reject);
+  });
 }
 
 /**
@@ -51,7 +54,9 @@ export function createLinkToken(rs, data) {
 export function deleteToken(rs, tokenId) {
     return new Promise((resolve, reject) => {
         axios.delete(`${API_URL}/rs/${rs.id}/lt/${tokenId}`)
-            .then(resolve)
+            .then(() => {
+              refreshLinkTokens(rs).then(resolve).catch(reject);
+            })
             .catch(reject);
     });
 }

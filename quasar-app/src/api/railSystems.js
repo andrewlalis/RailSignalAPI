@@ -7,8 +7,12 @@ export class RailSystem {
     constructor(data) {
         this.id = data.id;
         this.name = data.name;
+        this.settings = null;
+
         this.segments = [];
         this.components = [];
+        this.linkTokens = [];
+
         this.websocket = null;
         this.selectedComponents = [];
     }
