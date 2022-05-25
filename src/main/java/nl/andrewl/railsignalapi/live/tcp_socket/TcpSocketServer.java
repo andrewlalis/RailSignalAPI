@@ -6,6 +6,7 @@ import nl.andrewl.railsignalapi.live.ComponentUplinkMessageHandler;
 import nl.andrewl.railsignalapi.model.LinkToken;
 import nl.andrewl.railsignalapi.service.LinkTokenService;
 import nl.andrewl.railsignalapi.util.JsonUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
@@ -43,6 +44,9 @@ public class TcpSocketServer {
 	private final ServerSocket serverSocket;
 	private final Set<TcpLinkManager> linkManagers;
 
+	@Value("${rail-signal.live.tcp.port}")
+	private int port;
+
 	private final LinkTokenService tokenService;
 	private final ComponentDownlinkService componentDownlinkService;
 	private final ComponentUplinkMessageHandler uplinkMessageHandler;
@@ -59,13 +63,13 @@ public class TcpSocketServer {
 		this.linkManagers = new HashSet<>();
 		this.serverSocket = new ServerSocket();
 		serverSocket.setReuseAddress(true);
-		serverSocket.bind(new InetSocketAddress("localhost", 8081));
+		serverSocket.bind(new InetSocketAddress("localhost", port));
 	}
 
 	@EventListener(ApplicationReadyEvent.class)
 	public void runServer() {
 		new Thread(() -> {
-			log.info("Starting TCP Socket for Component links at " + serverSocket.getInetAddress());
+			log.info("Starting TCP Socket for Component links at " + serverSocket.getInetAddress() + ":" + port);
 			while (!serverSocket.isClosed()) {
 				try {
 					Socket socket = serverSocket.accept();
