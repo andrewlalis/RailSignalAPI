@@ -3,7 +3,7 @@ package nl.andrewl.railsignalapi.live;
 import lombok.Getter;
 
 /**
- * A downlink connection to one or more components (linked by a {@link nl.andrewl.railsignalapi.model.LinkToken}
+ * A downlink connection to one or more components (linked by a {@link nl.andrewl.railsignalapi.model.LinkToken})
  * which we can send messages to.
  */
 public abstract class ComponentDownlink {

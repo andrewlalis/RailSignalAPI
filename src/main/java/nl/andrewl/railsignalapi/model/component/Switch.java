@@ -7,9 +7,7 @@ import lombok.Setter;
 import nl.andrewl.railsignalapi.model.RailSystem;
 
 import javax.persistence.*;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * A switch is a component that directs traffic between several connected
@@ -37,13 +35,5 @@ public class Switch extends PathNode {
 		super(railSystem, position, name, ComponentType.SWITCH, connectedNodes);
 		this.possibleConfigurations = possibleConfigurations;
 		this.activeConfiguration = activeConfiguration;
-	}
-
-	public Optional<SwitchConfiguration> findConfiguration(Set<Long> pathNodeIds) {
-		for (var config : possibleConfigurations) {
-			Set<Long> configNodeIds = config.getNodes().stream().map(Component::getId).collect(Collectors.toSet());
-			if (pathNodeIds.equals(configNodeIds)) return Optional.of(config);
-		}
-		return Optional.empty();
 	}
 }

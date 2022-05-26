@@ -14,6 +14,10 @@ public class WebConfig implements WebMvcConfigurer {
 		// Configure resource handlers to use the /app directory for all vue frontend stuff.
 		registry.addResourceHandler("/app/**")
 				.addResourceLocations("classpath:/app/");
+
+		// Configure resource handlers for driver files.
+		registry.addResourceHandler("/driver/**")
+				.addResourceLocations("classpath:/driver/");
 	}
 
 	@Override

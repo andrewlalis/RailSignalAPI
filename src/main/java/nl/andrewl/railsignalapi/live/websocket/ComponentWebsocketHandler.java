@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nl.andrewl.railsignalapi.live.ComponentDownlinkService;
 import nl.andrewl.railsignalapi.live.ComponentUplinkMessageHandler;
-import nl.andrewl.railsignalapi.live.dto.ComponentUplinkMessage;
+import nl.andrewl.railsignalapi.live.dto.ComponentMessage;
 import nl.andrewl.railsignalapi.util.JsonUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +12,8 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import java.io.IOException;
 
 /**
  * Handler for websocket connections that components open to send and receive
@@ -28,12 +30,21 @@ public class ComponentWebsocketHandler extends TextWebSocketHandler {
 	@Transactional(readOnly = true)
 	public void afterConnectionEstablished(WebSocketSession session) {
 		long tokenId = (long) session.getAttributes().get("tokenId");
-		componentDownlinkService.registerDownlink(new WebsocketDownlink(tokenId, session));
+		try {
+			componentDownlinkService.registerDownlink(new WebsocketDownlink(tokenId, session));
+		} catch (Exception e) {
+			log.error("An error occurred while registering a new websocket downlink.", e);
+			try {
+				session.close();
+			} catch (IOException ex) {
+				log.error("An error occurred while closing a websocket downlink.", e);
+			}
+		}
 	}
 
 	@Override
 	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-		var msg = JsonUtils.readMessage(message.getPayload(), ComponentUplinkMessage.class);
+		var msg = JsonUtils.readMessage(message.getPayload(), ComponentMessage.class);
 		uplinkMessageHandler.messageReceived(msg);
 	}
 

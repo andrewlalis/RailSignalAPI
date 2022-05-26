@@ -1,9 +1,12 @@
 package nl.andrewl.railsignalapi.live.dto;
 
+import lombok.NoArgsConstructor;
+
 /**
  * Message that's sent by segment boundaries when a train crosses it.
  */
-public class SegmentBoundaryUpdateMessage extends ComponentUplinkMessage {
+@NoArgsConstructor
+public class SegmentBoundaryUpdateMessage extends ComponentMessage {
 	/**
 	 * The id of the segment that a train detected by the segment boundary is
 	 * moving towards.

@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import nl.andrewl.railsignalapi.live.ComponentDownlink;
 import nl.andrewl.railsignalapi.live.ComponentDownlinkService;
 import nl.andrewl.railsignalapi.live.ComponentUplinkMessageHandler;
-import nl.andrewl.railsignalapi.live.dto.ComponentUplinkMessage;
+import nl.andrewl.railsignalapi.live.dto.ComponentMessage;
 import nl.andrewl.railsignalapi.util.JsonUtils;
 
 import java.io.DataInputStream;
@@ -43,10 +43,20 @@ public class TcpLinkManager extends ComponentDownlink implements Runnable {
 
 	@Override
 	public void run() {
-		downlinkService.registerDownlink(this);
+		try {
+			downlinkService.registerDownlink(this);
+		} catch (Exception e) {
+			log.error("An error occurred while registering a downlink.");
+			try {
+				shutdown();
+			} catch (IOException ex) {
+				log.error("An error occurred while shutting down a downlink.", ex);
+			}
+			return;
+		}
 		while (!socket.isClosed()) {
 			try {
-				var msg = JsonUtils.readMessage(in, ComponentUplinkMessage.class);
+				var msg = JsonUtils.readMessage(in, ComponentMessage.class);
 				uplinkMessageHandler.messageReceived(msg);
 			} catch (IOException e) {
 				log.warn("An error occurred while receiving an uplink message.", e);

@@ -1,13 +1,19 @@
 package nl.andrewl.railsignalapi.live.dto;
 
-import java.util.Set;
+import lombok.NoArgsConstructor;
 
 /**
  * Message that's sent by a switch when its active configuration is updated.
  */
-public class SwitchUpdateMessage extends ComponentUplinkMessage {
+@NoArgsConstructor
+public class SwitchUpdateMessage extends ComponentMessage {
 	/**
-	 * A set of path node ids that represents the active configuration.
+	 * The id of the configuration that's active.
 	 */
-	public Set<Long> configuration;
+	public long activeConfigId;
+
+	public SwitchUpdateMessage(long cId, long activeConfigId) {
+		super(cId, "SWITCH_UPDATE");
+		this.activeConfigId = activeConfigId;
+	}
 }

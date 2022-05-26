@@ -2,7 +2,7 @@ package nl.andrewl.railsignalapi.live;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nl.andrewl.railsignalapi.live.dto.ComponentUplinkMessage;
+import nl.andrewl.railsignalapi.live.dto.ComponentMessage;
 import nl.andrewl.railsignalapi.live.dto.SegmentBoundaryUpdateMessage;
 import nl.andrewl.railsignalapi.live.dto.SwitchUpdateMessage;
 import nl.andrewl.railsignalapi.service.SegmentService;
@@ -22,7 +22,7 @@ public class ComponentUplinkMessageHandler {
 	private final SegmentService segmentService;
 
 	@Transactional
-	public void messageReceived(ComponentUplinkMessage msg) {
+	public void messageReceived(ComponentMessage msg) {
 		if (msg instanceof SegmentBoundaryUpdateMessage sb) {
 			segmentService.onBoundaryUpdate(sb);
 		} else if (msg instanceof SwitchUpdateMessage sw) {

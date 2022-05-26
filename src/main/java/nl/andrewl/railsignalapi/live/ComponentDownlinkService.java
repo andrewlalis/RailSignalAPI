@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nl.andrewl.railsignalapi.dao.ComponentRepository;
 import nl.andrewl.railsignalapi.dao.LinkTokenRepository;
+import nl.andrewl.railsignalapi.live.dto.ComponentDataMessage;
+import nl.andrewl.railsignalapi.live.dto.ComponentMessage;
 import nl.andrewl.railsignalapi.live.websocket.AppUpdateService;
 import nl.andrewl.railsignalapi.model.component.Component;
 import org.springframework.stereotype.Service;
@@ -31,13 +33,18 @@ public class ComponentDownlinkService {
 	 * @param downlink The downlink to register.
 	 */
 	@Transactional
-	public synchronized void registerDownlink(ComponentDownlink downlink) {
+	public synchronized void registerDownlink(ComponentDownlink downlink) throws Exception {
 		Set<Component> components = tokenRepository.findById(downlink.getTokenId()).orElseThrow().getComponents();
 		componentDownlinks.put(downlink, components.stream().map(Component::getId).collect(Collectors.toSet()));
 		for (var c : components) {
 			c.setOnline(true);
 			componentRepository.save(c);
-			appUpdateService.sendComponentUpdate(c.getRailSystem().getId(), c.getId());
+
+			// Immediately send a data message to the downlink and app for each component that comes online.
+			var msg = new ComponentDataMessage(c);
+			downlink.send(msg);
+			appUpdateService.sendUpdate(c.getRailSystem().getId(), msg);
+
 			Set<ComponentDownlink> downlinks = downlinksByCId.computeIfAbsent(c.getId(), aLong -> new HashSet<>());
 			downlinks.add(downlink);
 		}
@@ -96,5 +103,9 @@ public class ComponentDownlinkService {
 				}
 			}
 		}
+	}
+
+	public void sendMessage(ComponentMessage msg) {
+		sendMessage(msg.cId, msg);
 	}
 }

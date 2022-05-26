@@ -53,6 +53,11 @@ public class AppUpdateService {
 		log.info("De-registered an app websocket session.");
 	}
 
+	/**
+	 * Sends an update to any connected apps.
+	 * @param rsId The id of the rail system that the update pertains to.
+	 * @param msg The message to send.
+	 */
 	public synchronized void sendUpdate(long rsId, Object msg) {
 		Set<WebSocketSession> sessionsForRs = sessions.get(rsId);
 		if (sessionsForRs != null) {

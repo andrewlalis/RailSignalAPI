@@ -68,11 +68,15 @@ public class SegmentService {
 
 	private void sendSegmentOccupiedStatus(Segment segment) {
 		for (var signal : segment.getSignals()) {
-			downlinkService.sendMessage(signal.getId(), new SegmentStatusMessage(signal.getId(), segment.isOccupied()));
+			downlinkService.sendMessage(signal.getId(), new SegmentStatusMessage(signal.getId(), segment.getId(), segment.isOccupied()));
 			appUpdateService.sendComponentUpdate(segment.getRailSystem().getId(), signal.getId());
 		}
 	}
 
+	/**
+	 * Handles updates from segment boundary components.
+	 * @param msg The update message.
+	 */
 	@Transactional
 	public void onBoundaryUpdate(SegmentBoundaryUpdateMessage msg) {
 		var segmentBoundary = segmentBoundaryRepository.findById(msg.cId)
