@@ -37,11 +37,21 @@ export function drawComponent(ctx, worldTx, component) {
     }
 }
 
-function drawSignal(ctx) {
+function drawSignal(ctx, signal) {
     roundedRect(ctx, -0.3, -0.5, 0.6, 1, 0.25);
     ctx.fillStyle = "black";
     ctx.fill();
-    ctx.fillStyle = "rgb(0, 255, 0)";
+    if (signal.segment) {
+      if (signal.segment.occupied === true) {
+        ctx.fillStyle = `rgb(255, 0, 0)`;
+      } else if (signal.segment.occupied === false) {
+        ctx.fillStyle = `rgb(0, 255, 0)`;
+      } else {
+        ctx.fillStyle = `rgb(255, 255, 0)`;
+      }
+    } else {
+      ctx.fillStyle = `rgb(0, 0, 255)`;
+    }
     circle(ctx, 0, -0.2, 0.15);
     ctx.fill();
 }

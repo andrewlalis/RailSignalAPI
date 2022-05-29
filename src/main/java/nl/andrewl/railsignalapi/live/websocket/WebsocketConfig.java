@@ -1,6 +1,7 @@
 package nl.andrewl.railsignalapi.live.websocket;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -17,6 +18,7 @@ import java.util.Set;
 @Configuration
 @EnableWebSocket
 @RequiredArgsConstructor
+@Slf4j
 public class WebsocketConfig implements WebSocketConfigurer {
 	private final ComponentWebsocketHandler componentHandler;
 	private final ComponentWebsocketHandshakeInterceptor componentInterceptor;
@@ -34,6 +36,7 @@ public class WebsocketConfig implements WebSocketConfigurer {
 		// If we're in a development profile, allow any origin to access the app websocket.
 		// This is so that we can use a standalone JS dev server.
 		if (Set.of(env.getActiveProfiles()).contains("development")) {
+			log.info("Allowing all origins to access app websocket because development profile is active.");
 			appHandlerReg.setAllowedOrigins("*");
 		}
 	}

@@ -5,7 +5,7 @@
       <q-item-label caption>Id: {{segment.id}}</q-item-label>
     </q-item-section>
     <q-item-section side v-if="segment.occupied">
-      <q-badge align="middle"></q-badge>
+      <q-chip>Occupied</q-chip>
     </q-item-section>
   </q-item>
 </template>

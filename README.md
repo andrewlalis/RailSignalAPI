@@ -1,19 +1,18 @@
-# RailSignalAPI
-A simple API for tracking rail traffic in signalled blocks.
+# Rail Signal
+A comprehensive solution to tracking and managing your rail system, in real time.
 
-You can download the program via [releases](https://github.com/andrewlalis/RailSignalAPI/releases).
+## Development
+To work on and develop Rail Signal, you will need to run both the Java/Spring-Boot backend API, and the Vue/Quasar frontend app.
 
-Once you download the JAR file, you can simply run it with `java -jar <jarfile>`. Note that this program requires Java 17.
+To start up the API, the project directory in IntelliJ (or the IDE of your choice), and run the `RailSignalApiApplication` main method.
 
-Once it's started up, navigate to http://localhost:8080 to view the RailSignal web interface, where you can make changes to your systems. You should start by creating a new rail system.
+To start up the app, open a terminal in the `quasar-app` directory, and run `quasar dev`.
 
-Once you've done that, you can go ahead and create some signals for your system.
-
-## Immersive Railroading and ComputerCraft
-To begin controlling your signals from within the game, you can set up a signal controller computer with a two detector augments on the rail (one for redstone, one for the computer connection) and two monitors. Make sure all perhipherals are connected to the network, and then run this command:
+### Building
+To build a complete API/app distributable JAR file, simply run the following:
 ```
-pastebin run Z72QhG7G
+./build_system.d
 ```
-This will run an installation script that will guide you through setting up your signal's configuration.
+> Note: The build script requires the D language toolchain to be installed on your system. Also, you can compile `build_system.d` to a native executable to run the build script more efficiently.
 
-See [here](https://imgur.com/a/685HV7d) for some examples of how to build the signal structures within your world.
+This will produce a `rail-signal-api-XXX.jar` file in the `target` directory, which contains both the API, and the frontend app, packaged together so that the entire JAR can simply be run via `java -jar`.

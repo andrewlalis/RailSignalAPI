@@ -23,7 +23,15 @@ export function establishWebsocketConnection(rs) {
       }
     };
     rs.websocket.onmessage = msg => {
-      console.log(msg);
+      const data = JSON.parse(msg.data);
+      console.log(data);
+      if (data.type === "COMPONENT_DATA") {
+        const id = data.cId;
+        const idx = rs.components.findIndex(c => c.id === id);
+        if (idx > -1) {
+          rs.components[idx] = data.data;
+        }
+      }
     };
     rs.websocket.onerror = error => {
       console.log(error);

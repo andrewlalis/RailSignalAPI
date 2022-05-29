@@ -16,6 +16,11 @@ import java.util.stream.Collectors;
 
 /**
  * A service that manages all the active component downlink connections.
+ *
+ * We keep track of active component downlinks by storing a mapping which maps
+ * each downlink to the set of components it is responsible for, and another
+ * mapping that maps each online component to the set of downlinks that are
+ * responsible for it.
  */
 @Service
 @RequiredArgsConstructor
@@ -29,7 +34,9 @@ public class ComponentDownlinkService {
 	private final AppUpdateService appUpdateService;
 
 	/**
-	 * Registers a new active downlink to one or more components.
+	 * Registers a new active downlink to one or more components. Sets all
+	 * linked components as online, and sends messages to any connected apps
+	 * to notify them of the update components.
 	 * @param downlink The downlink to register.
 	 */
 	@Transactional
@@ -38,7 +45,7 @@ public class ComponentDownlinkService {
 		componentDownlinks.put(downlink, components.stream().map(Component::getId).collect(Collectors.toSet()));
 		for (var c : components) {
 			c.setOnline(true);
-			componentRepository.save(c);
+			componentRepository.saveAndFlush(c); // Make sure to flush, so that online status is immediately visible everywhere.
 
 			// Immediately send a data message to the downlink and app for each component that comes online.
 			var msg = new ComponentDataMessage(c);

@@ -1,4 +1,4 @@
-package nl.andrewl.railsignalapi.rest.dto;
+package nl.andrewl.railsignalapi.rest.dto.link_token;
 
 import nl.andrewl.railsignalapi.model.LinkToken;
 import nl.andrewl.railsignalapi.model.component.Component;

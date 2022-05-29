@@ -84,9 +84,12 @@ public class SegmentService {
 		switch (msg.eventType) {
 			case ENTERING -> {
 				for (var segment : segmentBoundary.getSegments()) {
-					segment.setOccupied(true);
+					if (!segment.isOccupied()) {
+						segment.setOccupied(true);
+						segmentRepository.save(segment);
+					}
+					sendSegmentOccupiedStatus(segment);
 				}
-				segmentRepository.saveAll(segmentBoundary.getSegments());
 			}
 			case ENTERED -> {
 				List<Segment> otherSegments = new ArrayList<>(segmentBoundary.getSegments());
@@ -99,8 +102,10 @@ public class SegmentService {
 				});
 				// And all others as no longer occupied.
 				for (var segment : otherSegments) {
-					segment.setOccupied(false);
-					segmentRepository.save(segment);
+					if (segment.isOccupied()) {
+						segment.setOccupied(false);
+						segmentRepository.save(segment);
+					}
 					sendSegmentOccupiedStatus(segment);
 				}
 			}

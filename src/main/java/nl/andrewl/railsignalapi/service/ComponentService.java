@@ -5,6 +5,10 @@ import nl.andrewl.railsignalapi.dao.ComponentRepository;
 import nl.andrewl.railsignalapi.dao.RailSystemRepository;
 import nl.andrewl.railsignalapi.dao.SegmentRepository;
 import nl.andrewl.railsignalapi.dao.SwitchConfigurationRepository;
+import nl.andrewl.railsignalapi.live.ComponentDownlinkService;
+import nl.andrewl.railsignalapi.live.dto.ComponentDataMessage;
+import nl.andrewl.railsignalapi.live.dto.SwitchUpdateMessage;
+import nl.andrewl.railsignalapi.live.websocket.AppUpdateService;
 import nl.andrewl.railsignalapi.model.Segment;
 import nl.andrewl.railsignalapi.model.component.*;
 import nl.andrewl.railsignalapi.rest.dto.component.in.*;
@@ -30,6 +34,8 @@ public class ComponentService {
 	private final RailSystemRepository railSystemRepository;
 	private final SwitchConfigurationRepository switchConfigurationRepository;
 	private final SegmentRepository segmentRepository;
+	private final AppUpdateService appUpdateService;
+	private final ComponentDownlinkService downlinkService;
 
 	@Transactional(readOnly = true)
 	public List<ComponentResponse> getComponents(long rsId) {
@@ -99,7 +105,9 @@ public class ComponentService {
 		if (c instanceof Switch sw && payload instanceof SwitchPayload sp) {
 			updateSwitch(sw, sp, rsId);
 		}
-		return ComponentResponse.of(componentRepository.save(c));
+		c = componentRepository.save(c);
+		appUpdateService.sendUpdate(rsId, new ComponentDataMessage(c));
+		return ComponentResponse.of(c);
 	}
 
 	private void updateSignal(Signal s, SignalPayload sp, long rsId) {
@@ -181,6 +189,23 @@ public class ComponentService {
 		for (var node : connected) {
 			node.getConnectedNodes().add(owner);
 			componentRepository.save(node);
+		}
+	}
+
+	@Transactional
+	public void updateSwitchConfiguration(long rsId, long cId, SwitchConfigurationUpdatePayload payload) {
+		var component = componentRepository.findByIdAndRailSystemId(cId, rsId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		if (component instanceof Switch sw) {
+			for (var config : sw.getPossibleConfigurations()) {
+				if (config.getId().equals(payload.activeConfigurationId())) {
+					downlinkService.sendMessage(new SwitchUpdateMessage(sw.getId(), config.getId()));
+					return;
+				}
+			}
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid activeConfigurationId");
+		} else {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Component is not a switch.");
 		}
 	}
 }

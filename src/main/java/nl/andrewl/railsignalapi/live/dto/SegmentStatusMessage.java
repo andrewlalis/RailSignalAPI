@@ -11,16 +11,16 @@ public class SegmentStatusMessage extends ComponentMessage {
 	/**
 	 * The id of the segment that updated.
 	 */
-	private final long sId;
+	private final long segmentId;
 
 	/**
 	 * Whether the segment is occupied.
 	 */
 	private final boolean occupied;
 
-	public SegmentStatusMessage(long cId, long sId, boolean occupied) {
+	public SegmentStatusMessage(long cId, long segmentId, boolean occupied) {
 		super(cId, "SEGMENT_STATUS");
-		this.sId = sId;
+		this.segmentId = segmentId;
 		this.occupied = occupied;
 	}
 }

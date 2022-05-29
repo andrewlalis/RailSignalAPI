@@ -1,4 +1,4 @@
-package nl.andrewl.railsignalapi.rest.dto;
+package nl.andrewl.railsignalapi.rest.dto.link_token;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;

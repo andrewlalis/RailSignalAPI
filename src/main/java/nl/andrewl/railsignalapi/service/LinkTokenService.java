@@ -8,9 +8,10 @@ import nl.andrewl.railsignalapi.live.ComponentDownlinkService;
 import nl.andrewl.railsignalapi.model.LinkToken;
 import nl.andrewl.railsignalapi.model.component.Component;
 import nl.andrewl.railsignalapi.model.component.ComponentType;
-import nl.andrewl.railsignalapi.rest.dto.LinkTokenCreatedResponse;
-import nl.andrewl.railsignalapi.rest.dto.LinkTokenPayload;
-import nl.andrewl.railsignalapi.rest.dto.LinkTokenResponse;
+import nl.andrewl.railsignalapi.rest.dto.link_token.LinkTokenCreatedResponse;
+import nl.andrewl.railsignalapi.rest.dto.link_token.LinkTokenPayload;
+import nl.andrewl.railsignalapi.rest.dto.link_token.LinkTokenResponse;
+import nl.andrewl.railsignalapi.rest.dto.link_token.StandaloneLinkTokenResponse;
 import nl.andrewl.railsignalapi.util.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -81,5 +82,10 @@ public class LinkTokenService {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 		componentDownlinkService.deregisterDownlink(token.getId());
 		tokenRepository.delete(token);
+	}
+
+	@Transactional(readOnly = true)
+	public StandaloneLinkTokenResponse getToken(String rawToken) {
+		return new StandaloneLinkTokenResponse(validateToken(rawToken).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
 	}
 }

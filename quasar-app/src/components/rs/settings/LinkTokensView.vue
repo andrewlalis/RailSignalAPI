@@ -11,11 +11,11 @@
         v-for="token in railSystem.linkTokens"
         :key="token.id"
       >
-        <q-item-section>
+        <q-item-section top>
           <q-item-label>{{token.label}}</q-item-label>
           <q-item-label caption>{{token.id}}</q-item-label>
         </q-item-section>
-        <q-item-section>
+        <q-item-section top>
           <q-item-label caption>Components</q-item-label>
           <q-item-label>
             <q-chip
@@ -26,6 +26,9 @@
               size="sm"
             />
           </q-item-label>
+        </q-item-section>
+        <q-item-section top side>
+          <q-btn size="12px" flat dense round icon="delete" @click="deleteToken(token)"/>
         </q-item-section>
       </q-item>
       <q-item v-if="railSystem.linkTokens.length === 0">
@@ -102,7 +105,7 @@
 
 <script>
 import { RailSystem } from "src/api/railSystems";
-import { createLinkToken } from "src/api/linkTokens";
+import { createLinkToken, deleteLinkToken } from "src/api/linkTokens";
 import { useQuasar } from "quasar";
 
 export default {
@@ -132,6 +135,27 @@ export default {
     getEligibleComponents() {
       return this.railSystem.components.filter(component => {
         return component.type === "SIGNAL" || component.type === "SEGMENT_BOUNDARY" || component.type === "SWITCH";
+      });
+    },
+    deleteToken(token) {
+      this.quasar.dialog({
+        title: "Confirm Removal",
+        message: "Are you sure you want to remove this token? All devices using it will need to be given a new token.",
+        cancel: true
+      }).onOk(() => {
+        deleteLinkToken(this.railSystem, token.id)
+          .then(() => {
+            this.quasar.notify({
+              color: "positive",
+              message: "Token removed."
+            });
+          })
+          .catch(error => {
+            this.quasar.notify({
+              color: "negative",
+              message: "An error occurred: " + error.response.data.message
+            });
+          });
       });
     },
     onSubmit() {

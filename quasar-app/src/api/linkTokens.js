@@ -51,7 +51,7 @@ export function createLinkToken(rs, data) {
  * @param {RailSystem} rs
  * @param {Number} tokenId
  */
-export function deleteToken(rs, tokenId) {
+export function deleteLinkToken(rs, tokenId) {
     return new Promise((resolve, reject) => {
         axios.delete(`${API_URL}/rs/${rs.id}/lt/${tokenId}`)
             .then(() => {

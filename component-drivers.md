@@ -80,7 +80,7 @@ Signals display the status of a connected segment, and as such can only receive 
 {
   "cId": 123,
   "type": "SEGMENT_STATUS",
-  "sId": 4,
+  "segmentId": 4,
   "occupied": true
 }
 ```

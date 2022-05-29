@@ -2,6 +2,7 @@ package nl.andrewl.railsignalapi.rest;
 
 import lombok.RequiredArgsConstructor;
 import nl.andrewl.railsignalapi.rest.dto.component.in.ComponentPayload;
+import nl.andrewl.railsignalapi.rest.dto.component.in.SwitchConfigurationUpdatePayload;
 import nl.andrewl.railsignalapi.rest.dto.component.out.ComponentResponse;
 import nl.andrewl.railsignalapi.rest.dto.component.out.SimpleComponentResponse;
 import nl.andrewl.railsignalapi.service.ComponentCreationService;
@@ -56,5 +57,11 @@ public class ComponentsApiController {
 	@PatchMapping(path = "/{cId}")
 	public ComponentResponse updateComponent(@PathVariable long rsId, @PathVariable long cId, @RequestBody @Valid ComponentPayload payload) {
 		return componentService.updateComponent(rsId, cId, payload);
+	}
+
+	@PostMapping(path = "/{cId}/activeConfiguration")
+	public ResponseEntity<Void> updateSwitchConfiguration(@PathVariable long rsId, @PathVariable long cId, @RequestBody @Valid SwitchConfigurationUpdatePayload payload) {
+		componentService.updateSwitchConfiguration(rsId, cId, payload);
+		return ResponseEntity.noContent().build();
 	}
 }

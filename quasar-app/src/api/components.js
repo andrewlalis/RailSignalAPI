@@ -97,3 +97,16 @@ export function removeComponent(rs, id) {
             .catch(reject);
     });
 }
+
+export function updateSwitchConfiguration(rs, sw, configId) {
+  return new Promise((resolve, reject) => {
+    axios.post(
+      `${API_URL}/rs/${rs.id}/c/${sw.id}/activeConfiguration`,
+      {
+        activeConfigurationId: configId
+      }
+    )
+      .then(resolve)
+      .catch(reject);
+  });
+}

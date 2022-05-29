@@ -33,7 +33,7 @@ public class ComponentWebsocketHandshakeInterceptor implements HandshakeIntercep
 			response.setStatusCode(HttpStatus.BAD_REQUEST);
 			return false;
 		}
-		String rawToken = query.substring(tokenIdx);
+		String rawToken = query.substring(tokenIdx + "token=".length());
 		if (rawToken.length() < LinkToken.PREFIX_SIZE) {
 			response.setStatusCode(HttpStatus.BAD_REQUEST);
 			return false;

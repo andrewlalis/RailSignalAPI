@@ -7,7 +7,6 @@ import nl.andrewl.railsignalapi.live.ComponentUplinkMessageHandler;
 import nl.andrewl.railsignalapi.live.dto.ComponentMessage;
 import nl.andrewl.railsignalapi.util.JsonUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -27,7 +26,6 @@ public class ComponentWebsocketHandler extends TextWebSocketHandler {
 	private final ComponentUplinkMessageHandler uplinkMessageHandler;
 
 	@Override
-	@Transactional(readOnly = true)
 	public void afterConnectionEstablished(WebSocketSession session) {
 		long tokenId = (long) session.getAttributes().get("tokenId");
 		try {

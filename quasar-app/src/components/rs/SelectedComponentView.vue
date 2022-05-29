@@ -7,6 +7,12 @@
           <q-item-label>{{component.type}}</q-item-label>
           <q-item-label caption>Id: {{component.id}}</q-item-label>
         </q-item-section>
+        <q-item-section v-if="component.online === true" top side>
+          <q-chip color="positive" text-color="white">Online</q-chip>
+        </q-item-section>
+        <q-item-section v-if="component.online === false" top side>
+          <q-chip color="negative" text-color="white">Offline</q-chip>
+        </q-item-section>
       </q-item>
 
       <q-item clickable>
@@ -100,6 +106,9 @@
                 />
               </q-item-label>
             </q-item-section>
+            <q-item-section v-if="component.activeConfiguration === null || component.activeConfiguration.id !== config.id" side>
+              <q-btn dense size="sm" color="positive" @click="setActiveSwitchConfig(component, config.id)">Set Active</q-btn>
+            </q-item-section>
           </q-item>
         </q-list>
       </q-expansion-item>
@@ -118,7 +127,7 @@ import { RailSystem } from "src/api/railSystems";
 import { useRailSystemsStore } from "stores/railSystemsStore";
 import SegmentListItem from "components/rs/SegmentListItem.vue";
 import { useQuasar } from "quasar";
-import { removeComponent } from "src/api/components";
+import { removeComponent, updateSwitchConfiguration } from "src/api/components";
 
 export default {
   name: "SelectedComponentView",
@@ -166,6 +175,9 @@ export default {
             });
           });
       });
+    },
+    setActiveSwitchConfig(sw, configId) {
+      updateSwitchConfiguration(this.railSystem, sw, configId);
     }
   }
 };

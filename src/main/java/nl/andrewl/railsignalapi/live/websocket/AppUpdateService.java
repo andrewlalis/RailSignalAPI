@@ -3,8 +3,8 @@ package nl.andrewl.railsignalapi.live.websocket;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nl.andrewl.railsignalapi.dao.ComponentRepository;
+import nl.andrewl.railsignalapi.live.dto.ComponentDataMessage;
 import nl.andrewl.railsignalapi.model.component.Component;
-import nl.andrewl.railsignalapi.rest.dto.component.out.ComponentResponse;
 import nl.andrewl.railsignalapi.util.JsonUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,11 +77,9 @@ public class AppUpdateService {
 		}
 	}
 
-	@Transactional(readOnly = true)
 	public void sendComponentUpdate(long rsId, long componentId) {
 		componentRepository.findByIdAndRailSystemId(componentId, rsId).ifPresent(component -> {
-			ComponentResponse msg = ComponentResponse.of(component);
-			sendUpdate(rsId, msg);
+			sendUpdate(rsId, new ComponentDataMessage(component));
 		});
 	}
 }

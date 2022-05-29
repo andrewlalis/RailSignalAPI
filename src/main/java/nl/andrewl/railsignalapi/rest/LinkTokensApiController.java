@@ -1,9 +1,9 @@
 package nl.andrewl.railsignalapi.rest;
 
 import lombok.RequiredArgsConstructor;
-import nl.andrewl.railsignalapi.rest.dto.LinkTokenCreatedResponse;
-import nl.andrewl.railsignalapi.rest.dto.LinkTokenPayload;
-import nl.andrewl.railsignalapi.rest.dto.LinkTokenResponse;
+import nl.andrewl.railsignalapi.rest.dto.link_token.LinkTokenCreatedResponse;
+import nl.andrewl.railsignalapi.rest.dto.link_token.LinkTokenPayload;
+import nl.andrewl.railsignalapi.rest.dto.link_token.LinkTokenResponse;
 import nl.andrewl.railsignalapi.service.LinkTokenService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
