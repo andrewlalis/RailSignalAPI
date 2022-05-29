@@ -3,13 +3,15 @@ package nl.andrewl.railsignalapi.service;
 import lombok.RequiredArgsConstructor;
 import nl.andrewl.railsignalapi.dao.ComponentRepository;
 import nl.andrewl.railsignalapi.live.ComponentDownlinkService;
+import nl.andrewl.railsignalapi.live.dto.ComponentDataMessage;
 import nl.andrewl.railsignalapi.live.dto.ErrorMessage;
 import nl.andrewl.railsignalapi.live.dto.SwitchUpdateMessage;
 import nl.andrewl.railsignalapi.live.websocket.AppUpdateService;
 import nl.andrewl.railsignalapi.model.component.Switch;
-import nl.andrewl.railsignalapi.model.component.SwitchConfiguration;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 /**
  * Service for managing switches.
@@ -24,17 +26,20 @@ public class SwitchService {
 
 	@Transactional
 	public void onSwitchUpdate(SwitchUpdateMessage msg) {
-		switchRepository.findById(msg.cId).ifPresent(sw -> {
-			sw.getPossibleConfigurations().stream()
-				.filter(c -> c.getId().equals(msg.activeConfigId))
-				.findFirst()
-				.ifPresentOrElse(config -> {
+		Optional<Switch> optionalSwitch = switchRepository.findById(msg.cId);
+		if (optionalSwitch.isPresent()) {
+			Switch sw = optionalSwitch.get();
+			for (var config : sw.getPossibleConfigurations()) {
+				if (config.getId().equals(msg.activeConfigId)) {
 					sw.setActiveConfiguration(config);
 					switchRepository.save(sw);
-					appUpdateService.sendComponentUpdate(sw.getRailSystem().getId(), sw.getId());
-				}, () -> {
-					downlinkService.sendMessage(new ErrorMessage(sw.getId(), "Invalid active config id."));
-				});
-		});
+					appUpdateService.sendUpdate(sw.getRailSystem().getId(), new ComponentDataMessage(sw));
+					return;
+				}
+			}
+			downlinkService.sendMessage(new ErrorMessage(msg.cId, "Invalid config id."));
+		} else {
+			downlinkService.sendMessage(new ErrorMessage(msg.cId, "Unknown switch."));
+		}
 	}
 }
