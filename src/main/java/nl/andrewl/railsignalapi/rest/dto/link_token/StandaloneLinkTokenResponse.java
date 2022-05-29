@@ -2,7 +2,7 @@ package nl.andrewl.railsignalapi.rest.dto.link_token;
 
 import nl.andrewl.railsignalapi.model.LinkToken;
 import nl.andrewl.railsignalapi.model.component.Component;
-import nl.andrewl.railsignalapi.rest.dto.component.out.SimpleComponentResponse;
+import nl.andrewl.railsignalapi.rest.dto.component.out.ComponentResponse;
 
 import java.util.Comparator;
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.List;
 public record StandaloneLinkTokenResponse (
 		long id,
 		String label,
-		List<SimpleComponentResponse> components,
+		List<ComponentResponse> components,
 		long rsId,
 		String rsName
 ) {
@@ -29,7 +29,7 @@ public record StandaloneLinkTokenResponse (
 				token.getLabel(),
 				token.getComponents().stream()
 						.sorted(Comparator.comparing(Component::getName))
-						.map(SimpleComponentResponse::new).toList(),
+						.map(ComponentResponse::of).toList(),
 				token.getRailSystem().getId(),
 				token.getRailSystem().getName()
 		);

@@ -1,13 +1,16 @@
 -- Rail Signal CC:Tweaked Driver
 local VERSION = "1.0.0"
 
+local args = {...}
+
 -- Global config. Will be loaded at start of script.
 local config = {}
 -- Global websocket reference
 local ws = nil
 
-local function loadConfig()
-  local configFile = io.open("rs_config.tbl", "r")
+-- Loads config from a given filename and returns the table with data.
+local function loadConfig(filename)
+  local configFile = io.open(filename, "r")
   if not configFile then
     return nil
   end
@@ -17,6 +20,7 @@ local function loadConfig()
   return cfg
 end
 
+-- Fetches JSON data from the given endpoint, using the config's API url.
 local function fetchJson(endpoint)
   local response, msg, r = http.get({
     url = config.apiUrl .. endpoint,
@@ -207,9 +211,20 @@ local function initApiData()
 end
 
 -- MAIN SCRIPT
+term.clear()
 print("Rail Signal Device Driver " .. VERSION .. " for CC:Tweaked computers")
 print("  By Andrew Lalis <andrewlalisofficial@gmail.com>")
-config = loadConfig()
+print("-------------------------------------------------")
+if #args < 1 then
+  print("Missing required config filename argument.")
+  return
+end
+local configFilename = args[1]
+config = loadConfig(configFilename)
+if config == nil then
+  print("Error: Could not load config from file.")
+  return
+end
 print("Loaded config.")
 
 if initApiData() then

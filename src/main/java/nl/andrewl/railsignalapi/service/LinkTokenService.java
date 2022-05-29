@@ -59,6 +59,7 @@ public class LinkTokenService {
 
 	@Transactional(readOnly = true)
 	public Optional<LinkToken> validateToken(String rawToken) {
+		if (rawToken.length() < LinkToken.PREFIX_SIZE) return Optional.empty();
 		for (var token : tokenRepository.findAllByTokenPrefix(rawToken.substring(0, LinkToken.PREFIX_SIZE))) {
 			if (passwordEncoder.matches(rawToken, token.getTokenHash())) {
 				return Optional.of(token);
