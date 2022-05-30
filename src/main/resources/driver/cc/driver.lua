@@ -62,10 +62,12 @@ end
 local function displaySignal(signal)
   local color = colors.white
   if signal.segment.occupied ~= nil then
-    if signal.segment.occupied then
+    if signal.segment.occupied == true then
       color = colors.red
-    else
+    elseif signal.segment.occupied == false then
       color = colors.lime
+    else
+      color = colors.blue
     end
   end
   signal.segment.monitor.setBackgroundColor(color)
@@ -270,7 +272,7 @@ while true do
   elseif event == "websocket_closed" then
     for _, component in pairs(config.components) do
       if component.type == "SIGNAL" then
-        component.segment.occupied = nil
+        component.segment.occupied = "ERROR"
         displaySignal(component)
       end
     end
