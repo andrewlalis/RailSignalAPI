@@ -6,8 +6,12 @@ import nl.andrewl.railsignalapi.dao.ComponentRepository;
 import nl.andrewl.railsignalapi.dao.LinkTokenRepository;
 import nl.andrewl.railsignalapi.live.dto.ComponentDataMessage;
 import nl.andrewl.railsignalapi.live.dto.ComponentMessage;
+import nl.andrewl.railsignalapi.live.dto.SegmentStatusMessage;
+import nl.andrewl.railsignalapi.live.dto.SwitchUpdateMessage;
 import nl.andrewl.railsignalapi.live.websocket.AppUpdateService;
 import nl.andrewl.railsignalapi.model.component.Component;
+import nl.andrewl.railsignalapi.model.component.Signal;
+import nl.andrewl.railsignalapi.model.component.Switch;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +55,19 @@ public class ComponentDownlinkService {
 			var msg = new ComponentDataMessage(c);
 			downlink.send(msg);
 			appUpdateService.sendUpdate(c.getRailSystem().getId(), msg);
+
+			// Send initial data updates to make sure that devices' state is up to date immediately.
+			if (c instanceof Signal sig) {
+				downlink.send(new SegmentStatusMessage(c.getId(), sig.getSegment().getId(), sig.getSegment().isOccupied()));
+			} else if (c instanceof Switch sw) {
+				long activeConfigId;
+				if (sw.getActiveConfiguration() != null) {
+					activeConfigId = sw.getActiveConfiguration().getId();
+				} else {
+					activeConfigId = sw.getPossibleConfigurations().stream().findAny().orElseThrow().getId();
+				}
+				downlink.send(new SwitchUpdateMessage(c.getId(), activeConfigId));
+			}
 
 			Set<ComponentDownlink> downlinks = downlinksByCId.computeIfAbsent(c.getId(), aLong -> new HashSet<>());
 			downlinks.add(downlink);

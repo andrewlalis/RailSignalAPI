@@ -148,12 +148,20 @@ end
 -- SCRIPT START
 
 local config = {}
+local args = {...}
 print("Rail Signal Driver Installer for CC:Tweaked")
 print("-------------------------------------------")
-print("Please enter the base URL for your Rail System site.")
-print("  For example: http://localhost:8080")
-local baseUrl = readUrl()
+if #args < 1 then
+  print("Error: Missing required baseURL argument.")
+  return
+end
+local baseUrl = args[1]
 config.apiUrl = baseUrl .. "/api"
+local statusResponse = http.get(config.apiUrl .. "/status")
+if not statusResponse then
+  print("Error: Could not reach the the Rail Signal system at " .. config.apiUrl .. "/status")
+  return
+end
 if startsWith(baseUrl, "https") then
   config.wsUrl = "wss" .. string.sub(baseUrl, 6) .. "/api/ws/component"
 else
