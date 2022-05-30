@@ -71,8 +71,8 @@ module.exports = configure(function (ctx) {
       publicPath: "/app/",
       // analyze: true,
       env: {
-        API_URL: ctx.dev ? "http://localhost:8080/api" : "http://localhost:8080/api",
-        WS_URL: ctx.dev ? "ws://localhost:8080/api/ws/app" : "ws://localhost:8080/api/ws/app"
+        API_URL: ctx.dev ? "http://localhost:8080/api" : process.env.RAIL_SIGNAL_API_URL,
+        WS_URL: ctx.dev ? "ws://localhost:8080/api/ws/app" : process.env.RAIL_SIGNAL_WS_URL
       },
       // rawDefine: {}
       // ignorePublicFolder: true,

@@ -99,8 +99,6 @@
                   dense
                   size="sm"
                   :label="node.name"
-                  :color="component.activeConfiguration && component.activeConfiguration.id === config.id ? 'primary' : 'secondary'"
-                  :text-color="'white'"
                   clickable
                   @click="select(node)"
                 />
