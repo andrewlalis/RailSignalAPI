@@ -45,6 +45,7 @@ public class RailSystemService {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 		componentRepository.deleteAllByRailSystem(rs);
 		segmentRepository.deleteAllByRailSystem(rs);
+		rs.setSettings(null);
 		railSystemRepository.delete(rs);
 	}
 
