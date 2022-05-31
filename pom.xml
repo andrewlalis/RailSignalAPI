@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>nl.andrewl</groupId>
 	<artifactId>rail-signal-api</artifactId>
-	<version>2.0.0</version>
+	<version>2.0.1</version>
 	<name>rail-signal-api</name>
 	<description>A simple API for tracking rail traffic in signalled blocks.</description>
 	<properties>

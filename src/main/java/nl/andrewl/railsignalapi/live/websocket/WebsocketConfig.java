@@ -33,6 +33,7 @@ public class WebsocketConfig implements WebSocketConfigurer {
 				.addInterceptors(componentInterceptor);
 		WebSocketHandlerRegistration appHandlerReg = registry.addHandler(appHandler, "/api/ws/app/*")
 				.addInterceptors(appInterceptor);
+//		appHandlerReg.setAllowedOrigins("*");
 		// If we're in a development profile, allow any origin to access the app websocket.
 		// This is so that we can use a standalone JS dev server.
 		if (Set.of(env.getActiveProfiles()).contains("development")) {
