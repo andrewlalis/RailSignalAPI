@@ -26,6 +26,26 @@
       bordered
     >
       <rail-systems-list :rail-systems="rsStore.railSystems" />
+      <q-item
+        clickable
+        v-ripple
+        :to="'/'"
+        @click="rsStore.selectedRailSystem = null"
+      >
+        <q-item-section>
+          <q-item-label>Home</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item
+        clickable
+        v-ripple
+        :to="'/about'"
+        @click="rsStore.selectedRailSystem = null"
+      >
+        <q-item-section>
+          <q-item-label>About</q-item-label>
+        </q-item-section>
+      </q-item>
     </q-drawer>
 
     <q-page-container>

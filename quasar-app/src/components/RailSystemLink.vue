@@ -1,6 +1,7 @@
 <template>
   <q-item
     clickable
+    v-ripple
     :to="'/rail-systems/' + railSystem.id"
   >
     <q-item-section>

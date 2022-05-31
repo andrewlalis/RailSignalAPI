@@ -9,6 +9,10 @@ const routes = [
         path: '',
         component: () => import('pages/IndexPage.vue')
       },
+      {
+        path: 'about',
+        component: () => import('pages/AboutPage.vue')
+      },
       {// Rail Systems page
         path: 'rail-systems/:id',
         component: () => import('pages/RailSystem.vue'),
