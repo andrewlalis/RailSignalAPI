@@ -59,8 +59,9 @@ export function removeRailSystem(rsStore, id) {
             .then(() => {
                 rsStore.selectedRailSystem = null;
                 refreshRailSystems(rsStore)
-                    .then(() => resolve)
-                    .catch(error => reject(error));
-            });
+                    .then(resolve)
+                    .catch(reject);
+            })
+          .catch(reject);
     });
 }
