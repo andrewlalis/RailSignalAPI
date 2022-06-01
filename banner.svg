@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1280"
+   height="640"
+   viewBox="0 0 338.66666 169.33334"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   sodipodi:docname="banner.svg"
+   inkscape:export-filename="/home/andrew/Pictures/railsignalbanner.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
+  <defs
+     id="defs2">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="-19.654761 : -18.142858 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="338.66666 : 84.66667 : 1"
+       inkscape:persp3d-origin="169.33333 : 56.444447 : 1"
+       id="perspective815" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="845.17179"
+     inkscape:cy="205.3419"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-127.66666)">
+    <rect
+       style="fill:#659a54;fill-opacity:1;stroke:none;stroke-width:12.70000076;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect870"
+       width="338.66666"
+       height="169.33333"
+       x="0"
+       y="127.66666" />
+    <rect
+       style="fill:#454e44;fill-opacity:1;stroke:none;stroke-width:12.70000076;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect911"
+       width="338.66666"
+       height="111.125"
+       x="-1.110223e-16"
+       y="185.875" />
+    <g
+       id="g852"
+       transform="rotate(90,151.19047,228.96429)">
+      <path
+         inkscape:connector-curvature="0"
+         id="path835"
+         d="m 122.84226,146.37648 h 92.98215"
+         style="fill:none;stroke:#4a2b00;stroke-width:12.69999981;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         style="fill:none;stroke:#4a2b00;stroke-width:12.69999981;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 122.84226,212.9003 h 92.98215"
+         id="path837"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path839"
+         d="m 122.84226,246.1622 h 92.98215"
+         style="fill:none;stroke:#4a2b00;stroke-width:12.69999981;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         style="fill:none;stroke:#4a2b00;stroke-width:12.69999981;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 122.84226,179.63839 h 92.98215"
+         id="path841"
+         inkscape:connector-curvature="0" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path843"
+         d="m 122.84226,279.42411 h 92.98215"
+         style="fill:none;stroke:#4a2b00;stroke-width:12.69999981;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path831"
+         d="M 148.35565,291.70833 V 129.93452"
+         style="fill:none;stroke:#989898;stroke-width:8.46666718;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         style="fill:none;stroke:#989898;stroke-width:8.46666718;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 190.31102,291.70833 V 129.93452"
+         id="path833"
+         inkscape:connector-curvature="0" />
+    </g>
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot913"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:#102f07;stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       transform="matrix(0.57599614,0,0,0.57599614,-10.203222,101.60397)"><flowRegion
+         id="flowRegion915"
+         style="fill:#ffffff;fill-opacity:1;stroke:#102f07;stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"><rect
+           id="rect917"
+           width="1102.8572"
+           height="162.85715"
+           x="51.42857"
+           y="34.285713"
+           style="fill:#ffffff;fill-opacity:1;stroke:#102f07;stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" /></flowRegion><flowPara
+         id="flowPara919"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:96px;font-family:'Ubuntu Mono';-inkscape-font-specification:'Ubuntu Mono Bold';stroke:#102f07;stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1">Rail Signal</flowPara></flowRoot>    <g
+       id="g933"
+       transform="translate(123.59822)">
+      <path
+         inkscape:connector-curvature="0"
+         id="path921"
+         d="m 169.33333,245.97321 v 46.49107"
+         style="fill:none;stroke:#000000;stroke-width:16.93333435;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <rect
+         ry="2.6458333"
+         rx="2.6458333"
+         y="196.08035"
+         x="152.13544"
+         height="51.026794"
+         width="34.395802"
+         id="rect923"
+         style="fill:#000000;fill-opacity:1;stroke:#bababa;stroke-width:4.23333359;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <circle
+         r="6.0476193"
+         cy="212.33333"
+         cx="169.33333"
+         id="path925"
+         style="fill:#1cd500;fill-opacity:1;stroke:none;stroke-width:8.46666718;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <circle
+         style="fill:#d50000;fill-opacity:1;stroke:none;stroke-width:8.46666718;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="circle927"
+         cx="169.33333"
+         cy="228.5863"
+         r="6.0476193" />
+    </g>
+  </g>
+</svg>

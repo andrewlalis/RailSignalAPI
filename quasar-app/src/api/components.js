@@ -98,6 +98,18 @@ export function removeComponent(rs, id) {
     });
 }
 
+export function updateComponent(rs, component) {
+  return new Promise((resolve, reject) => {
+    axios.patch(`${API_URL}/rs/${rs.id}/c/${component.id}`, component)
+      .then(() => {
+        refreshComponents(rs)
+          .then(resolve)
+          .catch(reject);
+      })
+      .catch(reject);
+  });
+}
+
 export function updateSwitchConfiguration(rs, sw, configId) {
   return new Promise((resolve, reject) => {
     axios.post(

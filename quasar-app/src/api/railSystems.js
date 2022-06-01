@@ -62,7 +62,7 @@ export function removeRailSystem(rsStore, id) {
         axios.delete(`${API_URL}/rs/${id}`)
             .then(() => {
                 if (rsStore.selectedRailSystem !== null && rsStore.selectedRailSystem.id === id) {
-                  rsStore.selectRailSystem(null);
+                  rsStore.selectedRailSystem = null;
                 }
                 refreshRailSystems(rsStore)
                     .then(resolve)

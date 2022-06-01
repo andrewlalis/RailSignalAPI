@@ -71,8 +71,11 @@ function drawDebugInfo(ctx) {
     "Scale factor: " + getScaleFactor(),
     `(x = ${lastWorldPoint.x.toFixed(2)}, y = ${lastWorldPoint.y.toFixed(2)}, z = ${lastWorldPoint.z.toFixed(2)})`,
     `Components: ${railSystem.components.length}`,
-    `Hovered elements: ${hoveredElements.length}`
+    `Hovered components: ${hoveredElements.length}`
   ]
+  for (let i = 0; i < hoveredElements.length; i++) {
+    lines.push("  " + hoveredElements[i].name);
+  }
   for (let i = 0; i < lines.length; i++) {
     ctx.fillText(lines[i], 10, 20 + (i * 15));
   }

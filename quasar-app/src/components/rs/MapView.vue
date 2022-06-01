@@ -1,14 +1,14 @@
 <template>
   <div class="row">
     <div class="col-md-8" id="railSystemMapCanvasContainer">
-      <canvas id="railSystemMapCanvas" height="800">
+      <canvas id="railSystemMapCanvas" height="600">
         Your browser doesn't support canvas.
       </canvas>
     </div>
     <q-scroll-area class="col-md-4" v-if="railSystem.selectedComponents.length > 0">
       <div class="row" v-for="component in railSystem.selectedComponents" :key="component.id">
         <div class="col full-width">
-          <selected-component-view :component="component" :rail-system="railSystem" />
+          <selected-component-view :component="component"/>
         </div>
 
       </div>
@@ -178,11 +178,10 @@
 </template>
 
 <script>
-import { RailSystem } from "src/api/railSystems";
-import { draw, initMap } from "src/render/mapRenderer";
+import {RailSystem} from "src/api/railSystems";
+import {draw, initMap} from "src/render/mapRenderer";
 import SelectedComponentView from "components/rs/SelectedComponentView.vue";
-import { useQuasar } from "quasar";
-import { createComponent } from "src/api/components";
+import {useQuasar} from "quasar";
 import AddComponentDialog from "components/rs/add_component/AddComponentDialog.vue";
 
 export default {

@@ -26,22 +26,12 @@
       bordered
     >
       <rail-systems-list :rail-systems="rsStore.railSystems" />
-      <q-item
-        clickable
-        v-ripple
-        :to="'/'"
-        @click="rsStore.selectRailSystem(null)"
-      >
+      <q-item clickable v-ripple :to="'/'">
         <q-item-section>
           <q-item-label>Home</q-item-label>
         </q-item-section>
       </q-item>
-      <q-item
-        clickable
-        v-ripple
-        :to="'/about'"
-        @click="rsStore.selectRailSystem(null)"
-      >
+      <q-item clickable v-ripple :to="'/about'">
         <q-item-section>
           <q-item-label>About</q-item-label>
         </q-item-section>
@@ -68,7 +58,6 @@ export default defineComponent({
   setup () {
     const rsStore = useRailSystemsStore()
     const leftDrawerOpen = ref(false)
-
     return {
       rsStore,
       leftDrawerOpen,
