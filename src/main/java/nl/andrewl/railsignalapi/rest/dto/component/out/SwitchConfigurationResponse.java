@@ -2,6 +2,7 @@ package nl.andrewl.railsignalapi.rest.dto.component.out;
 
 import nl.andrewl.railsignalapi.model.component.SwitchConfiguration;
 
+import java.util.Comparator;
 import java.util.List;
 
 public record SwitchConfigurationResponse (
@@ -11,7 +12,10 @@ public record SwitchConfigurationResponse (
 	public SwitchConfigurationResponse(SwitchConfiguration sc) {
 		this(
 				sc.getId(),
-				sc.getNodes().stream().map(SimpleComponentResponse::new).toList()
+				sc.getNodes().stream()
+						.map(SimpleComponentResponse::new)
+						.sorted(Comparator.comparing(SimpleComponentResponse::name))
+						.toList()
 		);
 	}
 }

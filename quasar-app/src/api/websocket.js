@@ -1,5 +1,10 @@
 import { WS_URL } from "./constants";
 
+/**
+ * The time to wait before attempting to reconnect if a websocket connection is
+ * abruptly closed.
+ * @type {number}
+ */
 const WS_RECONNECT_TIMEOUT = 3000;
 
 /**
@@ -8,6 +13,9 @@ const WS_RECONNECT_TIMEOUT = 3000;
  * @return {Promise} A promise that resolves when a connection is established.
  */
 export function establishWebsocketConnection(rs) {
+  if (rs.websocket) {
+    console.log('rail system ' + rs.id + ' already has websocket')
+  }
   return new Promise(resolve => {
     rs.websocket = new WebSocket(`${WS_URL}/${rs.id}`);
     rs.websocket.onopen = resolve;
@@ -29,7 +37,7 @@ export function establishWebsocketConnection(rs) {
         const id = data.cId;
         const idx = rs.components.findIndex(c => c.id === id);
         if (idx > -1) {
-          rs.components[idx] = data.data;
+          Object.assign(rs.components[idx], data.data);
         }
       }
     };
@@ -46,12 +54,15 @@ export function establishWebsocketConnection(rs) {
  */
 export function closeWebsocketConnection(rs) {
   return new Promise(resolve => {
-    if (rs.websocket) {
-      rs.websocket.onclose = resolve;
+    if (rs.websocket && rs.websocket.readyState !== WebSocket.CLOSED) {
+      rs.websocket.onclose = () => {
+        rs.websocket = null;
+        resolve();
+      };
       rs.websocket.close();
     } else {
+      rs.websocket = null;
       resolve();
     }
   });
-
 }

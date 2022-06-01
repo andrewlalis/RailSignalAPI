@@ -3,7 +3,7 @@ This component is responsible for the rendering of a RailSystem in a 2d map
 view.
  */
 
-import {drawComponent, drawConnectedNodes} from "./drawing";
+import { drawMap } from "./drawing";
 
 const SCALE_VALUES = [0.01, 0.1, 0.25, 0.5, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0, 10.0, 12.0, 16.0, 20.0, 30.0, 45.0, 60.0, 80.0, 100.0];
 const SCALE_INDEX_NORMAL = 7;
@@ -56,73 +56,26 @@ export function draw() {
     ctx.resetTransform();
     ctx.fillStyle = `rgb(240, 240, 240)`;
     ctx.fillRect(0, 0, width, height);
-    const worldTx = getWorldTransform();
-    ctx.setTransform(worldTx);
 
-    // Draw segments!
-    const segmentPoints = new Map();
-    railSystem.segments.forEach(segment => segmentPoints.set(segment.id, []));
-    for (let i = 0; i < railSystem.components.length; i++) {
-        const c = railSystem.components[i];
-        if (c.type === "SEGMENT_BOUNDARY") {
-            for (let j = 0; j < c.segments.length; j++) {
-                segmentPoints.get(c.segments[j].id).push({x: c.position.x, y: c.position.z});
-            }
-        }
-    }
-    railSystem.segments.forEach(segment => {
-        const points = segmentPoints.get(segment.id);
-        const avgPoint = {x: 0, y: 0};
-        points.forEach(point => {
-            avgPoint.x += point.x;
-            avgPoint.y += point.y;
-        });
-        avgPoint.x /= points.length;
-        avgPoint.y /= points.length;
-        let r = 5;
-        points.forEach(point => {
-            const dist2 = Math.pow(avgPoint.x - point.x, 2) + Math.pow(avgPoint.y - point.y, 2);
-            if (dist2 > r * r) {
-                r = Math.sqrt(dist2);
-            }
-        });
-        ctx.fillStyle = `rgba(200, 200, 200, 0.25)`;
-        const p = worldPointToMap(new DOMPoint(avgPoint.x, avgPoint.y, 0, 0));
-        const s = getScaleFactor();
-        ctx.beginPath();
-        ctx.arc(p.x / s, p.y / s, r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-        ctx.font = "3px Sans-Serif";
-        ctx.fillText(`${segment.name}`, p.x / s, p.y / s);
-    });
+    drawMap(ctx, railSystem);
+    drawDebugInfo(ctx);
+}
 
-    for (let i = 0; i < railSystem.components.length; i++) {
-        const c = railSystem.components[i];
-        if (c.connectedNodes !== undefined && c.connectedNodes !== null) {
-            drawConnectedNodes(ctx, worldTx, c);
-        }
-    }
-
-    for (let i = 0; i < railSystem.components.length; i++) {
-        drawComponent(ctx, worldTx, railSystem.components[i]);
-    }
-
-    // Draw debug info.
-    ctx.resetTransform();
-    ctx.fillStyle = "black";
-    ctx.strokeStyle = "black";
-    ctx.font = "10px Sans-Serif";
-    const lastWorldPoint = mapPointToWorld(lastMousePoint);
-    const lines = [
-        "Scale factor: " + getScaleFactor(),
-        `(x = ${lastWorldPoint.x.toFixed(2)}, y = ${lastWorldPoint.y.toFixed(2)}, z = ${lastWorldPoint.z.toFixed(2)})`,
-        `Components: ${railSystem.components.length}`,
-        `Hovered elements: ${hoveredElements.length}`
-    ]
-    for (let i = 0; i < lines.length; i++) {
-        ctx.fillText(lines[i], 10, 20 + (i * 15));
-    }
+function drawDebugInfo(ctx) {
+  ctx.resetTransform();
+  ctx.fillStyle = "black";
+  ctx.strokeStyle = "black";
+  ctx.font = "10px Sans-Serif";
+  const lastWorldPoint = mapPointToWorld(lastMousePoint);
+  const lines = [
+    "Scale factor: " + getScaleFactor(),
+    `(x = ${lastWorldPoint.x.toFixed(2)}, y = ${lastWorldPoint.y.toFixed(2)}, z = ${lastWorldPoint.z.toFixed(2)})`,
+    `Components: ${railSystem.components.length}`,
+    `Hovered elements: ${hoveredElements.length}`
+  ]
+  for (let i = 0; i < lines.length; i++) {
+    ctx.fillText(lines[i], 10, 20 + (i * 15));
+  }
 }
 
 export function getScaleFactor() {
@@ -133,7 +86,7 @@ export function getScaleFactor() {
  * Gets a matrix that transforms world coordinates to canvas.
  * @returns {DOMMatrix}
  */
-function getWorldTransform() {
+export function getWorldTransform() {
     const canvasRect = mapCanvas.getBoundingClientRect();
     const scale = getScaleFactor();
     const tx = new DOMMatrix();
@@ -159,7 +112,7 @@ export function isComponentSelected(component) {
  * @param {DOMPoint} p
  * @returns {DOMPoint}
  */
-function mapPointToWorld(p) {
+export function mapPointToWorld(p) {
     return getWorldTransform().invertSelf().transformPoint(p);
 }
 
@@ -168,7 +121,7 @@ function mapPointToWorld(p) {
  * @param {DOMPoint} p
  * @returns {DOMPoint}
  */
-function worldPointToMap(p) {
+export function worldPointToMap(p) {
     return getWorldTransform().transformPoint(p);
 }
 

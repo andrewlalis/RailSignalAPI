@@ -20,20 +20,22 @@ export const useRailSystemsStore = defineStore('RailSystemsStore', {
     actions: {
       /**
        * Updates the selected rail system.
-       * @param rsId {Number} The new rail system id.
+       * @param rsId {Number | null} The new rail system id.
        * @returns {Promise} A promise that resolves when the new rail system is
        * fully loaded and ready.
        */
       selectRailSystem(rsId) {
         // Close any existing websocket connections prior to refreshing.
         const wsClosePromises = [];
-        if (this.selectedRailSystem) {
+        if (this.selectedRailSystem !== null) {
           wsClosePromises.push(closeWebsocketConnection(this.selectedRailSystem));
         }
+        if (rsId === null) return Promise.all(wsClosePromises);
         return new Promise(resolve => {
           Promise.all(wsClosePromises).then(() => {
             refreshRailSystems(this).then(() => {
               const rs = this.railSystems.find(r => r.id === rsId);
+              console.log(rs);
               const updatePromises = [];
               updatePromises.push(refreshSegments(rs));
               updatePromises.push(refreshComponents(rs));

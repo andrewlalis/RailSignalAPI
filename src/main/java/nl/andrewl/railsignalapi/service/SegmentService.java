@@ -1,6 +1,7 @@
 package nl.andrewl.railsignalapi.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import nl.andrewl.railsignalapi.dao.ComponentRepository;
 import nl.andrewl.railsignalapi.dao.RailSystemRepository;
 import nl.andrewl.railsignalapi.dao.SegmentRepository;
@@ -24,6 +25,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SegmentService {
 	private final SegmentRepository segmentRepository;
 	private final RailSystemRepository railSystemRepository;

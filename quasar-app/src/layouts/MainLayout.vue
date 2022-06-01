@@ -30,7 +30,7 @@
         clickable
         v-ripple
         :to="'/'"
-        @click="rsStore.selectedRailSystem = null"
+        @click="rsStore.selectRailSystem(null)"
       >
         <q-item-section>
           <q-item-label>Home</q-item-label>
@@ -40,7 +40,7 @@
         clickable
         v-ripple
         :to="'/about'"
-        @click="rsStore.selectedRailSystem = null"
+        @click="rsStore.selectRailSystem(null)"
       >
         <q-item-section>
           <q-item-label>About</q-item-label>

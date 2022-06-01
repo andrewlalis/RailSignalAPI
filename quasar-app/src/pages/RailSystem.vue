@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <div v-if="railSystem">
+    <div v-if="railSystem && railSystem.loaded">
       <q-tabs
         v-model="panel"
         align="left"
@@ -25,6 +25,10 @@
       <router-view />
     </div>
 
+    <q-inner-loading
+      :showing="!railSystem || !railSystem.loaded"
+      label="Loading rail system..."
+    />
   </q-page>
 </template>
 
@@ -33,6 +37,7 @@ import { useRailSystemsStore } from "stores/railSystemsStore";
 import MapView from "components/rs/MapView.vue";
 import SegmentsView from "components/rs/SegmentsView.vue";
 import SettingsView from "components/rs/SettingsView.vue";
+import { loadData, unloadData } from "src/api/railSystems";
 
 export default {
   name: "RailSystemPage",
@@ -41,23 +46,45 @@ export default {
     return {
       panel: "map",
       railSystem: null,
-
-      linkTokens: []
+      loading: false
     }
   },
-  beforeRouteEnter(to, from, next) {
-    const id = parseInt(to.params.id);
+  setup() {
     const rsStore = useRailSystemsStore();
-    rsStore.selectRailSystem(id).then(() => {
-      next(vm => vm.railSystem = rsStore.selectedRailSystem);
-    });
+    return {rsStore};
   },
-  beforeRouteUpdate(to, from) {
-    const id = parseInt(to.params.id);
-    const rsStore = useRailSystemsStore();
-    rsStore.selectRailSystem(id).then(() => {
-      this.railSystem = rsStore.selectedRailSystem;
-    });
+  mounted() {
+    this.updateRailSystem();
+  },
+  created() {
+    this.$watch(
+      () => this.$route.params,
+      this.updateRailSystem,
+      {
+        immediate: true
+      }
+    )
+  },
+  methods: {
+    async updateRailSystem() {
+      if (this.loading) return;
+      this.loading = true;
+      console.log(">>>> updating rail system.")
+      if (this.railSystem) {
+        this.rsStore.selectedRailSystem = null;
+        await unloadData(this.railSystem);
+      }
+      if (this.$route.params.id) {
+        const newRsId = parseInt(this.$route.params.id);
+        const rs = this.rsStore.railSystems.find(r => r.id === newRsId);
+        if (rs) {
+          this.railSystem = rs;
+          this.rsStore.selectedRailSystem = rs;
+          await loadData(rs);
+        }
+      }
+      this.loading = false;
+    }
   }
 };
 </script>

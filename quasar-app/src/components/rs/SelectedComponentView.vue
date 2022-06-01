@@ -176,6 +176,9 @@ export default {
     },
     setActiveSwitchConfig(sw, configId) {
       updateSwitchConfiguration(this.railSystem, sw, configId);
+    },
+    isConfigActive(sw, config) {
+      return sw.activeConfiguration !== null && sw.activeConfiguration.id === config.id;
     }
   }
 };
