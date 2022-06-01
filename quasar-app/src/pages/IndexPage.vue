@@ -99,6 +99,12 @@
         boundary, or when a switch updates, or anything else it should know
         about.
       </p>
+      <p>
+        For Minecraft-related systems which use Lua computers, you can generally
+        run <code>pastebin run jKyAiE8k</code> to run an installer script that
+        automatically downloads the compatible drivers and walks you through an
+        installation process.
+      </p>
     </index-page-section>
     <index-page-section title="Advanced Usage">
       <q-img src="~assets/img/guide/layout2.png"/>
