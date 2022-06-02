@@ -3,7 +3,7 @@ Helper functions to actually perform rendering of different components.
 */
 
 import { getScaleFactor, getWorldTransform, isComponentHovered, isComponentSelected } from "./mapRenderer";
-import { circle, roundedRect } from "./canvasUtils";
+import { circle, roundedRect, sortPoints } from "./canvasUtils";
 import randomColor from "randomcolor";
 
 export function drawMap(ctx, rs) {
@@ -16,6 +16,7 @@ export function drawMap(ctx, rs) {
 
 function drawSegments(ctx, rs) {
   const segmentPoints = new Map();
+  // Gather for each segment a set of points representing its bounds.
   rs.segments.forEach(segment => segmentPoints.set(segment.id, []));
   for (let i = 0; i < rs.components.length; i++) {
     const c = rs.components[i];
@@ -24,6 +25,11 @@ function drawSegments(ctx, rs) {
         segmentPoints.get(c.segments[j].id).push({x: c.position.x, y: c.position.z});
       }
     }
+  }
+  // Sort the points to make regular convex polygons.
+  for (let i = 0; i < rs.segments.length; i++) {
+    const unsortedPoints = segmentPoints.get(rs.segments[i].id);
+    segmentPoints.set(rs.segments[i].id, sortPoints(unsortedPoints));
   }
 
   for (let i = 0; i < rs.segments.length; i++) {

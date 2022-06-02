@@ -6,6 +6,7 @@ import nl.andrewl.railsignalapi.dao.ComponentRepository;
 import nl.andrewl.railsignalapi.dao.RailSystemRepository;
 import nl.andrewl.railsignalapi.dao.SegmentRepository;
 import nl.andrewl.railsignalapi.live.ComponentDownlinkService;
+import nl.andrewl.railsignalapi.live.dto.ErrorMessage;
 import nl.andrewl.railsignalapi.live.dto.SegmentBoundaryUpdateMessage;
 import nl.andrewl.railsignalapi.live.dto.SegmentStatusMessage;
 import nl.andrewl.railsignalapi.live.websocket.AppUpdateService;
@@ -83,8 +84,21 @@ public class SegmentService {
 	public void onBoundaryUpdate(SegmentBoundaryUpdateMessage msg) {
 		var segmentBoundary = segmentBoundaryRepository.findById(msg.cId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-		switch (msg.eventType) {
+		segmentRepository.findByIdAndRailSystemId(msg.toSegmentId, segmentBoundary.getRailSystem().getId())
+			.ifPresentOrElse(
+				segment -> handleSegmentBoundaryMessage(msg.eventType, segmentBoundary, segment),
+				() -> downlinkService.sendMessage(new ErrorMessage(msg.cId, "Invalid toSegmentId."))
+			);
+	}
+
+	private void handleSegmentBoundaryMessage(
+			SegmentBoundaryUpdateMessage.Type type,
+			SegmentBoundaryNode segmentBoundary,
+			Segment toSegment
+	) {
+		switch (type) {
 			case ENTERING -> {
+				log.info("Train entering segment {} in rail system {}.", toSegment.getName(), segmentBoundary.getRailSystem().getName());
 				for (var segment : segmentBoundary.getSegments()) {
 					if (!segment.isOccupied()) {
 						segment.setOccupied(true);
@@ -94,20 +108,17 @@ public class SegmentService {
 				}
 			}
 			case ENTERED -> {
+				log.info("Train has entered segment {} in rail system {}.", toSegment.getName(), segmentBoundary.getRailSystem().getName());
 				List<Segment> otherSegments = new ArrayList<>(segmentBoundary.getSegments());
 				// Set the "to" segment as occupied.
-				segmentRepository.findById(msg.toSegmentId).ifPresent(segment -> {
-					segment.setOccupied(true);
-					segmentRepository.save(segment);
-					sendSegmentOccupiedStatus(segment);
-					otherSegments.remove(segment);
-				});
+				toSegment.setOccupied(true);
+				segmentRepository.save(toSegment);
+				otherSegments.remove(toSegment);
 				// And all others as no longer occupied.
 				for (var segment : otherSegments) {
-					if (segment.isOccupied()) {
-						segment.setOccupied(false);
-						segmentRepository.save(segment);
-					}
+					log.info("Train has left segment {} in rail system {}.", segment.getName(), segmentBoundary.getRailSystem().getName());
+					segment.setOccupied(false);
+					segmentRepository.save(segment);
 					sendSegmentOccupiedStatus(segment);
 				}
 			}

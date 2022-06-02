@@ -127,7 +127,19 @@ export default {
   },
   methods: {
     setActiveSwitchConfig(configId) {
-      updateSwitchConfiguration(this.railSystem, this.sw, configId);
+      updateSwitchConfiguration(this.rsStore.selectedRailSystem, this.sw, configId)
+        .then(() => {
+          this.quasar.notify({
+            color: "positive",
+            message: "Sent switch configuration update request."
+          });
+        })
+        .catch(error => {
+          this.quasar.notify({
+            color: "negative",
+            message: "An error occurred: " + error.response.data.message
+          });
+        });
     },
     isConfigActive(config) {
       return this.sw.activeConfiguration !== null && this.sw.activeConfiguration.id === config.id;

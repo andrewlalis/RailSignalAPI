@@ -87,9 +87,6 @@ public class ComponentCreationService {
 			}
 			s.getPossibleConfigurations().add(new SwitchConfiguration(s, pathNodes));
 		}
-		if (s.getPossibleConfigurations().size() < 2) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least two switch configurations are needed.");
-		}
 		return s;
 	}
 

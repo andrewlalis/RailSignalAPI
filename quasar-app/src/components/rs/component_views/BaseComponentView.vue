@@ -70,7 +70,7 @@ export default {
         message: "Are you sure you want to remove this component? This cannot be undone.",
         cancel: true
       }).onOk(() => {
-        removeComponent(this.railSystem, component.id)
+        removeComponent(this.rsStore.selectedRailSystem, component.id)
           .then(() => {
             this.quasar.notify({
               color: "positive",
