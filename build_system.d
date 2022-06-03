@@ -54,7 +54,11 @@ int main(string[] args) {
             if (args.length >= 3 && args[2].strip.toLower == "release") {
                 print("Are you sure you want to create a GitHub release for version %s?", ver);
                 string response = readln().strip.toLower;
-                if (response == "yes" || response == "y") createRelease(ver);
+                if (response == "yes" || response == "y") {
+                    print("Please enter a short description for this release.");
+                    string description = readln().strip;
+                    createRelease(ver, description);
+                }
             }
         }
     } else {
@@ -109,7 +113,13 @@ string getVersion() {
     return null;
 }
 
-void createRelease(string ver) {
+/** 
+ * Creates a new GitHub release using the specified version, and uploads the
+ * JAR file to the release.
+ * Params:
+ *   ver = The version.
+ */
+void createRelease(string ver, string description) {
     import d_properties;
     import requests;
     import std.json;
@@ -119,7 +129,7 @@ void createRelease(string ver) {
     JSONValue data = [
         "tag_name": "v" ~ ver,
         "name": "Rail Signal v" ~ ver,
-        "body": "An automated release."
+        "body": description
     ];
     data.object["prerelease"] = JSONValue(false);
     data.object["generate_release_notes"] = JSONValue(false);
@@ -138,6 +148,7 @@ void createRelease(string ver) {
         string responseBody = cast(string) response.responseBody;
         JSONValue responseData = parseJSON(responseBody);
         print("Created release %s", responseData["url"].str);
+        // Use the "upload-asset.sh" script to upload the asset, since internal requests api is broken.
         string command = format!"./upload-asset.sh github_api_token=%s owner=andrewlalis repo=RailSignalAPI tag=v%s filename=%s"(
             token,
             ver,
