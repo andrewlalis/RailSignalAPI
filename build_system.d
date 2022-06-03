@@ -3,6 +3,7 @@
     dependency "dsh" version="~>1.6.1"
     dependency "dxml" version="~>0.4.3"
     dependency "requests" version="~>2.0.8"
+    dependency "d-properties" version="~>1.0.4"
 +/
 
 /**
@@ -51,15 +52,9 @@ int main(string[] args) {
             buildApp();
             buildApi(ver);
             if (args.length >= 3 && args[2].strip.toLower == "release") {
-                if (args.length >= 4) {
-                    string token = args[3].strip();
-                    print("Are you sure you want to create a GitHub release for version %s?", ver);
-                    string response = readln().strip.toLower;
-                    if (response == "yes" || response == "y") createRelease(token, ver);
-                } else {
-                    error("Missing required personal access token to create a GitHub release.");
-                    return 1;
-                }
+                print("Are you sure you want to create a GitHub release for version %s?", ver);
+                string response = readln().strip.toLower;
+                if (response == "yes" || response == "y") createRelease(ver);
             }
         }
     } else {
@@ -114,6 +109,48 @@ string getVersion() {
     return null;
 }
 
-void createRelease(string token, string ver) {
-    
+void createRelease(string ver) {
+    import d_properties;
+    import requests;
+    import std.json;
+
+    print("Creating release...");
+
+    JSONValue data = [
+        "tag_name": "v" ~ ver,
+        "name": "Rail Signal v" ~ ver,
+        "body": "An automated release."
+    ];
+    data.object["prerelease"] = JSONValue(true);
+    data.object["generate_release_notes"] = JSONValue(false);
+    print("Sending release API request:\n%s", data.toPrettyString);
+
+    auto rq = Request();
+    rq.verbosity = 2;
+    auto props = Properties("github_token.properties");
+    string username = props["username"];
+    string token = props["token"];
+    rq.authenticator = new BasicAuthentication(username, token);
+    auto response = rq.post(
+        "https://api.github.com/repos/andrewlalis/RailSignalAPI/releases",
+        data.toString,
+        "application/json"
+    );
+    if (response.code == 201) {
+        string responseBody = cast(string) response.responseBody;
+        JSONValue responseData = parseJSON(responseBody);
+        string assetUrl = responseData["assets_url"].str;
+        print("Got asset url: %s", assetUrl);
+        auto f = File("./target/rail-signal-" ~ ver ~ ".jar", "rb");
+        auto assetResponse = rq.post(
+            assetUrl,
+            f.byChunk(4096),
+            "application/zip"
+        );
+        writeln(assetResponse);
+    } else {
+        error("An error occurred.");
+        writeln(response.responseBody);
+    }
 }
+    

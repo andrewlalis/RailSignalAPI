@@ -38,3 +38,4 @@ build/
 src/main/resources/app
 /build_system
 /log
+/github_token.properties
