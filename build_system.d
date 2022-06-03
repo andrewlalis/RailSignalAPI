@@ -121,12 +121,10 @@ void createRelease(string ver) {
         "name": "Rail Signal v" ~ ver,
         "body": "An automated release."
     ];
-    data.object["prerelease"] = JSONValue(true);
+    data.object["prerelease"] = JSONValue(false);
     data.object["generate_release_notes"] = JSONValue(false);
-    print("Sending release API request:\n%s", data.toPrettyString);
 
     auto rq = Request();
-    rq.verbosity = 2;
     auto props = Properties("github_token.properties");
     string username = props["username"];
     string token = props["token"];
@@ -139,17 +137,15 @@ void createRelease(string ver) {
     if (response.code == 201) {
         string responseBody = cast(string) response.responseBody;
         JSONValue responseData = parseJSON(responseBody);
-        string assetUrl = responseData["assets_url"].str;
-        print("Got asset url: %s", assetUrl);
-        auto f = File("./target/rail-signal-" ~ ver ~ ".jar", "rb");
-        auto assetResponse = rq.post(
-            assetUrl,
-            f.byChunk(4096),
-            "application/zip"
+        print("Created release %s", responseData["url"].str);
+        string command = format!"./upload-asset.sh github_api_token=%s owner=andrewlalis repo=RailSignalAPI tag=v%s filename=%s"(
+            token,
+            ver,
+            "./target/rail-signal-" ~ ver ~ ".jar"
         );
-        writeln(assetResponse);
+        runOrQuit(command);
     } else {
-        error("An error occurred.");
+        error("An error occurred while creating the release.");
         writeln(response.responseBody);
     }
 }
