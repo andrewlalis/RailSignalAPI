@@ -173,9 +173,11 @@ public class ComponentService {
 	}
 
 	private void updateConnectedNodes(PathNode owner, Set<PathNode> newNodes) {
+		// The set of all path nodes that will be disconnected from the owner.
 		Set<PathNode> disconnected = new HashSet<>(owner.getConnectedNodes());
 		disconnected.removeAll(newNodes);
 
+		// The set of all path nodes that will be connected to the owner.
 		Set<PathNode> connected = new HashSet<>(newNodes);
 		connected.removeAll(owner.getConnectedNodes());
 

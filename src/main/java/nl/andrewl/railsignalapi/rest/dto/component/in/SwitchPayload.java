@@ -4,6 +4,11 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+/**
+ * A switch has a set of possible configurations, each of which links two
+ * different nodes. Most conventional switches have two configurations, but for
+ * universal compatibility, as many as 10 may be allowed.
+ */
 public class SwitchPayload extends ComponentPayload {
 	@NotNull @Size(max = 10)
 	public SwitchConfigurationPayload[] possibleConfigurations;

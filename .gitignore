@@ -37,3 +37,4 @@ build/
 
 src/main/resources/app
 /build_system
+/log
