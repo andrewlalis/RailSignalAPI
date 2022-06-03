@@ -76,6 +76,16 @@ public class SegmentService {
 		}
 	}
 
+	@Transactional
+	public FullSegmentResponse toggleOccupied(long rsId, long sId) {
+		var segment = segmentRepository.findByIdAndRailSystemId(sId, rsId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		segment.setOccupied(!segment.isOccupied());
+		segmentRepository.save(segment);
+		sendSegmentOccupiedStatus(segment);
+		return new FullSegmentResponse(segment);
+	}
+
 	/**
 	 * Handles updates from segment boundary components.
 	 * @param msg The update message.

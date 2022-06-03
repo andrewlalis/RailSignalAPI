@@ -48,3 +48,16 @@ export function removeSegment(rs, segmentId) {
             .catch(error => reject(error));
     });
 }
+
+export function toggleOccupied(rs, segmentId) {
+  return new Promise((resolve, reject) => {
+    axios.patch(`${API_URL}/rs/${rs.id}/s/${segmentId}/occupied`)
+      .then(response => {
+        const updatedSegment = response.data;
+        const segment = rs.segments.find(s => s.id === updatedSegment.id);
+        segment.occupied = updatedSegment.occupied;
+        resolve();
+      })
+      .catch(reject);
+  })
+}

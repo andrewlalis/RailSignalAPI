@@ -36,4 +36,9 @@ public class SegmentsApiController {
 		segmentService.remove(rsId, sId);
 		return ResponseEntity.noContent().build();
 	}
+
+	@PatchMapping(path = "/{sId}/occupied")
+	public FullSegmentResponse toggleOccupied(@PathVariable long rsId, @PathVariable long sId) {
+		return segmentService.toggleOccupied(rsId, sId);
+	}
 }

@@ -13,9 +13,15 @@
               <q-item-label>{{segment.name}}</q-item-label>
               <q-item-label caption>Id: {{segment.id}}</q-item-label>
             </q-item-section>
+            <q-item-section v-if="segment.occupied" side>
+              <q-chip label="Occupied"/>
+            </q-item-section>
 
             <q-menu touch-position context-menu>
               <q-list dense style="min-width: 100px">
+                <q-item clickable v-close-popup @click="toggleOccupiedInline(segment)">
+                  <q-item-section>Toggle Occupied</q-item-section>
+                </q-item>
                 <q-item clickable v-close-popup @click="remove(segment)">
                   <q-item-section>Delete</q-item-section>
                 </q-item>
@@ -68,7 +74,7 @@
 import { useRailSystemsStore } from "stores/railSystemsStore";
 import { RailSystem } from "src/api/railSystems";
 import { useQuasar } from "quasar";
-import { createSegment, removeSegment } from "src/api/segments";
+import { createSegment, removeSegment, toggleOccupied } from "src/api/segments";
 import { ref } from "vue";
 
 export default {
@@ -114,6 +120,9 @@ export default {
     },
     onReset() {
       this.segmentName = "";
+    },
+    toggleOccupiedInline(segment) {
+      toggleOccupied(this.rsStore.selectedRailSystem, segment.id)
     },
     remove(segment) {
       this.quasar.dialog({

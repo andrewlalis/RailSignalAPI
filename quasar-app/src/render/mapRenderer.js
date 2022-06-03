@@ -23,7 +23,7 @@ const hoveredElements = [];
 export function initMap(rs) {
     railSystem = rs;
     console.log("Initializing map for rail system: " + rs.name);
-    hoveredElements.length = 0;
+    resetView();
     mapCanvas = document.getElementById("railSystemMapCanvas");
     mapContainerDiv = document.getElementById("railSystemMapCanvasContainer");
     mapCanvas.removeEventListener("wheel", onMouseWheel);
@@ -37,6 +37,16 @@ export function initMap(rs) {
 
     // Do an initial draw.
     draw();
+}
+
+function resetView() {
+  mapTranslation.x = 0;
+  mapTranslation.y = 0;
+  mapDragOrigin = null;
+  mapDragTranslation = null;
+  lastMousePoint = new DOMPoint(0, 0, 0, 0);
+  hoveredElements.length = 0;
+  mapScaleIndex = SCALE_INDEX_NORMAL;
 }
 
 export function draw() {
