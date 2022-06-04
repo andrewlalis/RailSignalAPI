@@ -14,6 +14,9 @@ const HOVER_RADIUS = 10;
 
 export let LAST_MOUSE_POINT = null;
 
+const SELECTION_MODE_NORMAL = 1;
+const SELECTION_MODE_CHOOSE = 2;
+let selectionMode = SELECTION_MODE_NORMAL;
 const componentSelectionListeners = new Map();
 
 /**
@@ -72,8 +75,18 @@ function onMouseDown(event) {
  * @param {MouseEvent} event
  */
 function onMouseUp(event) {
-  const finishingDrag = camPanNonzero();
+  if (selectionMode === SELECTION_MODE_NORMAL) {
+    handleNormalSelectionMouseUp(event);
+  }
   camPanFinish();
+}
+
+/**
+ * Handles the mouse up event in normal selection mode. This means changing the
+ * set of selected components.
+ * @param {MouseEvent} event
+ */
+function handleNormalSelectionMouseUp(event) {
   if (MAP_COMPONENTS_HOVERED.length > 0) {
     if (!event.shiftKey) {// If the user isn't holding SHIFT, clear the set of selected components first.
       MAP_RAIL_SYSTEM.selectedComponents.length = 0;
@@ -89,7 +102,7 @@ function onMouseUp(event) {
       }
     }
     componentSelectionListeners.forEach(callback => callback(MAP_RAIL_SYSTEM.selectedComponents));
-  } else if (!finishingDrag) {
+  } else if (!camPanNonzero()) {
     MAP_RAIL_SYSTEM.selectedComponents.length = 0;
   }
 }

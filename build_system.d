@@ -32,6 +32,8 @@ const LOG_DIR = "./log";
 const API_LOG = LOG_DIR ~ "/api_build.txt";
 const APP_LOG = LOG_DIR ~ "/app_build.txt";
 
+const GITHUB_PROPS_FILE = "github_token.properties";
+
 int main(string[] args) {
     string ver = getVersion();
     if (ver is null) {
@@ -135,7 +137,7 @@ void createRelease(string ver, string description) {
     data.object["generate_release_notes"] = JSONValue(false);
 
     auto rq = Request();
-    auto props = Properties("github_token.properties");
+    auto props = Properties(GITHUB_PROPS_FILE);
     string username = props["username"];
     string token = props["token"];
     rq.authenticator = new BasicAuthentication(username, token);
@@ -148,13 +150,21 @@ void createRelease(string ver, string description) {
         string responseBody = cast(string) response.responseBody;
         JSONValue responseData = parseJSON(responseBody);
         print("Created release %s", responseData["url"].str);
-        // Use the "upload-asset.sh" script to upload the asset, since internal requests api is broken.
-        string command = format!"./upload-asset.sh github_api_token=%s owner=andrewlalis repo=RailSignalAPI tag=v%s filename=%s"(
-            token,
-            ver,
-            "./target/rail-signal-" ~ ver ~ ".jar"
+        long releaseId = responseData["id"].integer;
+        string uploadUrl = format!"https://uploads.github.com/repos/andrewlalis/RailSignalAPI/releases/%d/assets?name=%s"(
+            releaseId,
+            "rail-signal-" ~ ver ~ ".jar"
         );
-        runOrQuit(command);
+        print("Uploading JAR file to %s", uploadUrl);
+        auto f = File("./target/rail-signal-" ~ ver ~ ".jar", "rb");
+        ulong assetSize = f.size();
+        rq.addHeaders(["Content-Length": format!"%d"(assetSize)]);
+        auto assetResponse = rq.post(uploadUrl, f.byChunk(4096));
+        if (assetResponse.code == 201) {
+            print("JAR file uploaded successfully.");
+        } else {
+            error("An error occurred while uploading the JAR file.");
+        }
     } else {
         error("An error occurred while creating the release.");
         writeln(response.responseBody);
