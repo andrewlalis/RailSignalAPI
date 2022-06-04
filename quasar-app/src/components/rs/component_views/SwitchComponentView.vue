@@ -15,10 +15,8 @@
               dense
               size="sm"
               :label="node.name"
-              clickable
             />
           </q-item-label>
-          <q-item-label caption>Configuration #{{config.id}}</q-item-label>
         </q-item-section>
         <q-item-section v-if="!isConfigActive(config)" side top>
           <q-btn dense size="sm" color="positive" @click="setActiveSwitchConfig(config.id)">Set Active</q-btn>

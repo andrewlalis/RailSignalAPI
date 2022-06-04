@@ -1,3 +1,5 @@
+import { MAP_CANVAS } from "src/map/mapRenderer";
+
 export function roundedRect(ctx, x, y, w, h, r) {
     if (w < 2 * r) r = w / 2;
     if (h < 2 * r) r = h / 2;
@@ -47,4 +49,16 @@ function distCompare(p0, a, b) {
   const distA = (p0.x-a.x)*(p0.x-a.x) + (p0.y-a.y)*(p0.y-a.y);
   const distB = (p0.x-b.x)*(p0.x-b.x) + (p0.y-b.y)*(p0.y-b.y);
   return distA - distB;
+}
+
+/**
+ * Gets the point at which the user clicked on the map.
+ * @param {MouseEvent} event
+ * @returns {DOMPoint}
+ */
+export function getMousePoint(event) {
+  const rect = MAP_CANVAS.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  return new DOMPoint(x, y, 0, 1);
 }

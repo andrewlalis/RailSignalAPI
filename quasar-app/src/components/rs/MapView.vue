@@ -1,7 +1,7 @@
 <template>
   <div class="row">
     <div class="col-md-8" id="railSystemMapCanvasContainer">
-      <canvas id="railSystemMapCanvas" height="600">
+      <canvas id="railSystemMapCanvas" height="700">
         Your browser doesn't support canvas.
       </canvas>
     </div>
@@ -21,17 +21,20 @@
 
 <script>
 import {RailSystem} from "src/api/railSystems";
-import {draw, initMap} from "src/render/mapRenderer";
+import {draw, initMap} from "src/map/mapRenderer";
 import SelectedComponentView from "components/rs/SelectedComponentView.vue";
 import {useQuasar} from "quasar";
 import AddComponentForm from "components/rs/add_component/AddComponentForm.vue";
+import { useRailSystemsStore } from "stores/railSystemsStore";
+import { registerComponentSelectionListener } from "src/map/mapEventListener";
 
 export default {
   name: "MapView",
   components: { AddComponentForm, SelectedComponentView },
   setup() {
+    const rsStore = useRailSystemsStore();
     const quasar = useQuasar();
-    return {quasar};
+    return {quasar, rsStore};
   },
   props: {
     railSystem: {
@@ -48,9 +51,11 @@ export default {
   },
   mounted() {
     initMap(this.railSystem);
+    registerComponentSelectionListener("addComponentFormHide", () => this.addComponent.visible = false);
   },
   updated() {
     initMap(this.railSystem);
+    registerComponentSelectionListener("addComponentFormHide", () => this.addComponent.visible = false);
   },
   watch: {
     railSystem: {
@@ -58,6 +63,11 @@ export default {
         draw();
       },
       deep: true
+    },
+    'addComponent.visible'(newValue) { // Deselect all components when the user opens the "Add Component" form.
+      if (newValue === true) {
+        this.rsStore.selectedRailSystem.selectedComponents.length = 0;
+      }
     }
   }
 };
